@@ -1,5 +1,6 @@
 package test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +18,6 @@ import propertyAccessor.FieldGet;
 import propertyAccessor.PropertyDefinition;
 import propertyAccessor.PropertyNamerConvention;
 import checks.CheckCollections;
-import collectionUtils.ListUtil;
 
 /**
  * @author TeamworkGuy2
@@ -96,7 +96,12 @@ public class FieldGetSetTest {
 		List<CompoundProperty<Object>> fields = FieldGet.getAllFieldsRecursive(Branch.class, Arrays.asList(StringBuilder.class, String.class));
 
 		List<String> expectBranchFields = Arrays.asList("branchId", "branchName", "branchDescription", "tmpStrB", "awesome", "id", "t", "count");
-		CheckCollections.assertLooseEquals(expectBranchFields, ListUtil.map(fields, (f) -> f.getFieldName()));
+
+		List<String> fieldNames = new ArrayList<>();
+		for(CompoundProperty<Object> field : fields) {
+			fieldNames.add(field.getFieldName());
+		}
+		CheckCollections.assertLooseEquals(expectBranchFields, fieldNames);
 
 
 		Branch copy = new Branch(0, "", "", 0, false, false, "");

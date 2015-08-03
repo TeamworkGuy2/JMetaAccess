@@ -68,7 +68,7 @@ public class ClassInstanceOfTest {
 
 
 	public static <K, V> Map.Entry<K, V> entry(K key, V value) {
-		return new AbstractMap.SimpleImmutableEntry(key, value);
+		return new AbstractMap.SimpleImmutableEntry<>(key, value);
 	}
 
 }

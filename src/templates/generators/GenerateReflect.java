@@ -4,10 +4,10 @@ import java.util.Arrays;
 import java.util.List;
 
 import templates.ReflectionUtilTypes;
+import twg2.collections.util.ListUtil;
 import codeTemplate.PrimitiveClassTemplateDeprecated;
 import codeTemplate.PrimitiveTemplates;
 import codeTemplate.TemplateRender;
-import collectionUtils.ListUtil;
 
 
 /**

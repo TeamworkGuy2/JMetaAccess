@@ -7,8 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import collectionUtils.Entries;
-import collectionUtils.MapUtil;
+import twg2.collections.tuple.Entries;
+import twg2.collections.util.MapUtil;
 
 /**
  * @author TeamworkGuy2

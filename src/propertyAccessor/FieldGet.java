@@ -13,9 +13,9 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import simpleTree.TreeUtil;
+import twg2.collections.tuple.Tuples;
+import twg2.collections.util.ListUtil;
 import typeInfo.JavaPrimitives;
-import collectionUtils.Entries;
-import collectionUtils.ListUtil;
 
 /**
  * @author TeamworkGuy2
@@ -169,7 +169,7 @@ public class FieldGet {
 			}
 		}
 
-		return Entries.of(known, unknown);
+		return Tuples.of(known, unknown);
 	}
 
 

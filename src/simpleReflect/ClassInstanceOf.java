@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import collectionUtils.Entries;
+import twg2.collections.tuple.Tuples;
 
 /**
  * @author TeamworkGuy2
@@ -19,7 +19,7 @@ public class ClassInstanceOf {
 
 		for(Class<?> type : classes) {
 			if(type.isAssignableFrom(clazz)) {
-				assignableTo.add(Entries.of(type, depthSeparation(type, clazz)));
+				assignableTo.add(Tuples.of(type, depthSeparation(type, clazz)));
 			}
 		}
 

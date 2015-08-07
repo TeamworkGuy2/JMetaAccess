@@ -4,8 +4,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-import collectionUtils.Entries;
-import dataCollections.BiTypeList;
+import twg2.collections.tuple.Tuples;
+import twg2.collections.util.dataStructures.BiTypeList;
 
 /**
  * @author TeamworkGuy2
@@ -134,7 +134,7 @@ public class CompoundProperty<T> implements PropertyDefinition<T> {
 			}
 		}
 
-		return Entries.of(parentObj, accessor);
+		return Tuples.of(parentObj, accessor);
 	}
 
 }

@@ -5,9 +5,9 @@ import java.util.List;
 
 import templates.ReflectionUtilTypes;
 import twg2.collections.util.ListUtil;
-import codeTemplate.PrimitiveClassTemplateDeprecated;
-import codeTemplate.PrimitiveTemplates;
-import codeTemplate.TemplateRender;
+import codeTemplate.primitiveTemplate.PrimitiveTemplates;
+import codeTemplate.primitiveTemplate.PrimitiveTypeClassTemplate;
+import codeTemplate.render.TemplateRenders;
 
 
 /**
@@ -19,20 +19,20 @@ public class GenerateReflect {
 
 
 	public static final void generateSimpleField() {
-		List<PrimitiveClassTemplateDeprecated> primitiveTypes = ListUtil.map(GenerateReflect.primitiveTypes, (type) -> PrimitiveTemplates.newPrimitiveTemplate(type, "subtype"));
+		List<PrimitiveTypeClassTemplate> primitiveTypes = ListUtil.map(GenerateReflect.primitiveTypes, (type) -> PrimitiveTemplates.newPrimitiveTemplate(type, "subtype"));
 		ReflectionUtilTypes tmpl = new ReflectionUtilTypes(primitiveTypes, primitiveTypes);
 		tmpl.className = "SimpleField";
 		tmpl.packageName = "simpleReflect";
-		TemplateRender.renderClassTemplates("src/templates/SimpleField.stg", "SimpleField", tmpl);
+		TemplateRenders.renderClassTemplates("src/templates/SimpleField.stg", "SimpleField", tmpl);
 	}
 
 
 	public static final void generateSimpleMethod() {
-		List<PrimitiveClassTemplateDeprecated> primitiveTypes = ListUtil.map(GenerateReflect.primitiveTypes, (type) -> PrimitiveTemplates.newPrimitiveTemplate(type, "subtype"));
+		List<PrimitiveTypeClassTemplate> primitiveTypes = ListUtil.map(GenerateReflect.primitiveTypes, (type) -> PrimitiveTemplates.newPrimitiveTemplate(type, "subtype"));
 		ReflectionUtilTypes tmpl = new ReflectionUtilTypes(primitiveTypes, primitiveTypes);
 		tmpl.className = "SimpleMethod";
 		tmpl.packageName = "simpleReflect";
-		TemplateRender.renderClassTemplates("src/templates/SimpleMethod.stg", "SimpleMethod", tmpl);
+		TemplateRenders.renderClassTemplates("src/templates/SimpleMethod.stg", "SimpleMethod", tmpl);
 	}
 
 

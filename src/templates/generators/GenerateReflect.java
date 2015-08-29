@@ -19,7 +19,7 @@ public class GenerateReflect {
 
 
 	public static final void generateSimpleField() {
-		List<PrimitiveTypeClassTemplate> primitiveTypes = ListUtil.map(GenerateReflect.primitiveTypes, (type) -> PrimitiveTemplates.newPrimitiveTemplate(type, "subtype"));
+		List<PrimitiveTypeClassTemplate> primitiveTypes = ListUtil.map(GenerateReflect.primitiveTypes, (type) -> PrimitiveTemplates.ofType(type, "subtype"));
 		ReflectionUtilTypes tmpl = new ReflectionUtilTypes(primitiveTypes, primitiveTypes);
 		tmpl.className = "SimpleField";
 		tmpl.packageName = "simpleReflect";
@@ -27,8 +27,17 @@ public class GenerateReflect {
 	}
 
 
+	public static final void generateSimpleFieldImpl() {
+		List<PrimitiveTypeClassTemplate> primitiveTypes = ListUtil.map(GenerateReflect.primitiveTypes, (type) -> PrimitiveTemplates.ofType(type, "subtype"));
+		ReflectionUtilTypes tmpl = new ReflectionUtilTypes(primitiveTypes, primitiveTypes);
+		tmpl.className = "SimpleFieldImpl";
+		tmpl.packageName = "simpleReflect";
+		TemplateRenders.renderClassTemplates("src/templates/SimpleFieldImpl.stg", "SimpleFieldImpl", tmpl);
+	}
+
+
 	public static final void generateSimpleMethod() {
-		List<PrimitiveTypeClassTemplate> primitiveTypes = ListUtil.map(GenerateReflect.primitiveTypes, (type) -> PrimitiveTemplates.newPrimitiveTemplate(type, "subtype"));
+		List<PrimitiveTypeClassTemplate> primitiveTypes = ListUtil.map(GenerateReflect.primitiveTypes, (type) -> PrimitiveTemplates.ofType(type, "subtype"));
 		ReflectionUtilTypes tmpl = new ReflectionUtilTypes(primitiveTypes, primitiveTypes);
 		tmpl.className = "SimpleMethod";
 		tmpl.packageName = "simpleReflect";
@@ -38,6 +47,7 @@ public class GenerateReflect {
 
 	public static final void generateAll() {
 		generateSimpleField();
+		generateSimpleFieldImpl();
 		generateSimpleMethod();
 	}
 

@@ -17,17 +17,6 @@ public class CompoundProperty<T> implements PropertyDefinition<T> {
 	private boolean setAccessible;
 
 
-	private Map.Entry<Object, Field> traverseAccessors(Object srcObject) {
-		if(!setAccessible) {
-			this.setAccessible = true;
-			parentToFieldAccessors.forEach((m) -> {}, (f) -> {
-				f.setAccessible(true);
-			});
-		}
-		Map.Entry<Object, Field> lastField = traverseAccessors(srcObject, parentToFieldAccessors);
-		return lastField;
-	}
-
 	public CompoundProperty() {
 		this.parentToFieldAccessors = new BiTypeList<>(Method.class, Field.class);
 	}
@@ -104,6 +93,18 @@ public class CompoundProperty<T> implements PropertyDefinition<T> {
 	@Override
 	public String toString() {
 		return "compoundFields: " + parentToFieldAccessors;
+	}
+
+
+	private Map.Entry<Object, Field> traverseAccessors(Object srcObject) {
+		if(!setAccessible) {
+			this.setAccessible = true;
+			parentToFieldAccessors.forEach((m) -> {}, (f) -> {
+				f.setAccessible(true);
+			});
+		}
+		Map.Entry<Object, Field> lastField = traverseAccessors(srcObject, parentToFieldAccessors);
+		return lastField;
 	}
 
 

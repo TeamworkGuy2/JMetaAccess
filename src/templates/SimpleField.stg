@@ -8,96 +8,51 @@ import java.lang.reflect.Field;
  * @since 2015-03-29
  */
 @javax.annotation.Generated("StringTemplate")
-public class $var.className$ {
-	private Field field;
+public interface $var.className$ {
 
 
-	public SimpleField(Field field) {
-		this.field = field;
-	\}
+	public Field getField();
 
 
-	public Field getField() {
-		return this.field;
-	\}
+	public Class<?> getDeclaringClass();
 
 
-	public Class<?> getDeclaringClass() {
-		return this.field.getDeclaringClass();
-	\}
+	public Class<?> getType();
 
 
-	public Class<?> getType() {
-		return this.field.getType();
-	\}
+	public String getName();
 
 
-	public String getName() {
-		return this.field.getName();
-	\}
-
-
-	@Override
-	public boolean equals(Object obj) {
-		return this.field.equals(obj);
-	\}
-
-
-	@Override
-	public int hashCode() {
-		return this.field.hashCode();
-	\}
-
-
-	@Override
-	public String toString() {
-		return this.field.toString();
-	\}
-
-
-	public Object get(Object obj) {
-		try {
-			return this.field.get(obj);
-		\} catch (IllegalArgumentException | IllegalAccessException e) {
-			throw new RuntimeException(e);
-		\}
-	\}
+	public Object get(Object obj);
 
 $var.primitiveTypes:{type |
 
 
-	public $type.type$ get$type.typeShortTitleCase$(Object obj) {
-		try {
-			return this.field.get$type.typeShortTitleCase$(obj);
-		\} catch (IllegalArgumentException | IllegalAccessException e) {
-			throw new RuntimeException(e);
-		\}
-	\}
-
-}$$var.primitiveTypes:{type | 	
-	public void set$type.objectType$(Object obj, $type.type$ z) {
-		try {
-			this.field.set$type.typeShortTitleCase$(obj, z);
-		\} catch (IllegalArgumentException | IllegalAccessException e) {
-			throw new RuntimeException(e);
-		\}
-	\}
+	public $type.type$ get$type.typeShortTitleCase$(Object obj);
 
 }$
-	public static <T> SimpleField createSimpleField(Class<T> clazz, String name) {
+	public void set(Object obj, Object z);
+
+$var.primitiveTypes:{type |
+
+
+	public void set$type.objectType$(Object obj, $type.type$ z);
+
+}$
+	public static <T> $var.className$Impl createSimpleField(Class<T> clazz, String name) {
 		try {
 			Field field = clazz.getField(name);
-			return new SimpleField(field);
+			return new $var.className$Impl(field);
 		} catch (NoSuchFieldException | SecurityException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
 
-	public static <T> SimpleField createSimpleDeclaredField(Class<T> clazz, String name) {
+	public static <T> $var.className$Impl createSimpleDeclaredField(Class<T> clazz, String name) {
 		try {
 			Field field = clazz.getDeclaredField(name);
-			return new SimpleField(field);
+			return new $var.className$Impl(field);
 		} catch (NoSuchFieldException | SecurityException e) {
 			throw new RuntimeException(e);
 		}

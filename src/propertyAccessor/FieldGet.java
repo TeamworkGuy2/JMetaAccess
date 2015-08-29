@@ -12,6 +12,12 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import simpleReflect.CompoundField;
+import simpleReflect.SimpleField;
+import simpleReflect.SimpleFieldImpl;
+import simpleTree.SimpleTree;
+import simpleTree.SimpleTreeImpl;
+import simpleTree.TreeBuilder;
 import simpleTree.TreeUtil;
 import twg2.collections.tuple.Tuples;
 import twg2.collections.util.ListUtil;
@@ -49,11 +55,11 @@ public class FieldGet {
 	}
 
 
-	/** Retrieve a map of all field names and their {@link Field} references for a class' inheritance tree
+	/** Retrieve list of {@link PropertyDefinition} for the {@link Field Fields} from a class' inheritance tree
 	 * @param clazz the class to get fields for
 	 * @return all the fields of a class (as if {@link Class#getDeclaredFields()} was invoked recursively on the class and all super classes and interfaces
 	 */
-	public static List<CompoundProperty<Object>> getAllFieldsRecursive(Class<?> clazz, Collection<Class<?>> stopAtFieldTypes) {
+	public static List<CompoundProperty<Object>> getAllPropertiesRecursive(Class<?> clazz, Collection<Class<?>> stopAtFieldTypes) {
 		List<CompoundProperty<Object>> allFields = new ArrayList<>();
 
 		Predicate<Field> fieldNotStaticFunc = (f) -> !Modifier.isStatic(f.getModifiers());
@@ -90,6 +96,98 @@ public class FieldGet {
 
 				allFields.add(compoundFieldGetSet);
 			});
+		}
+
+		return allFields;
+	}
+
+
+	/** Retrieve a list of compound {@link SimpleField} for the {@link Field Fields} from a class' inheritance tree
+	 * @param clazz the class to get fields for
+	 * @return all the fields of a class (as if {@link Class#getDeclaredFields()} was invoked recursively on the class and all super classes and interfaces
+	 */
+	public static List<CompoundField<Object>> getAllFieldsRecursiveCompound(Class<?> clazz, Collection<Class<?>> stopAtFieldTypes) {
+		List<CompoundField<Object>> allFields = new ArrayList<>();
+
+		Predicate<Field> fieldNotStaticFunc = (f) -> !Modifier.isStatic(f.getModifiers());
+		Function<Field, Class<?>> fieldTypeFunc = (f) -> f.getType();
+		Set<Class<?>> tmpChecked = new HashSet<>();
+		Map<String, Field> baseFields = new HashMap<String, Field>();
+		getAllFields0(clazz, tmpChecked, baseFields);
+		Map.Entry<List<Field>, List<Field>> filteredFields = filterKnownFields(baseFields.values(), fieldNotStaticFunc, fieldTypeFunc, true, true, stopAtFieldTypes);
+		allFields.addAll(ListUtil.map(filteredFields.getKey(), (f) -> new CompoundField<Object>(f)));
+
+		for(Field baseField : filteredFields.getValue()) {
+			TreeUtil.traverseNodesByDepthInPlace(baseField, true, (t) -> {
+				if(filterKnownField(t.getType(), true, true, stopAtFieldTypes)) {
+					return false;
+				}
+
+				Map<String, Field> tmpFields = getClassFields(t.getType(), tmpChecked);
+				Map.Entry<List<Field>, List<Field>> filteredFieldMap = filterKnownFields(tmpFields.values(), fieldNotStaticFunc, fieldTypeFunc, true, true, stopAtFieldTypes);
+
+				return filteredFieldMap.getValue().size() > 0;
+			}, (t) -> {
+				Map<String, Field> tmpFields = getClassFields(t.getType(), tmpChecked);
+				Map.Entry<List<Field>, List<Field>> filteredFieldMap = filterKnownFields(tmpFields.values(), fieldNotStaticFunc, fieldTypeFunc, true, true, stopAtFieldTypes);
+
+				List<Field> resList = new ArrayList<>(filteredFieldMap.getValue());
+				resList.addAll(filteredFieldMap.getKey());
+
+				return resList;
+			}, (branch, depth, parentBranches) -> {
+				// create the compound field getter/setter from the leaf field and parent field list
+				List<Field> fields = new ArrayList<>(parentBranches);
+				fields.add(branch);
+				CompoundField<Object> compoundField = new CompoundField<>(fields);
+
+				allFields.add(compoundField);
+			});
+		}
+
+		return allFields;
+	}
+
+
+	/** Retrieve a list of compound {@link SimpleField} for the {@link Field Fields} from a class' inheritance tree
+	 * @param clazz the class to get fields for
+	 * @return all the fields of a class (as if {@link Class#getDeclaredFields()} was invoked recursively on the class and all super classes and interfaces
+	 */
+	public static SimpleTree<SimpleField> getAllFieldsRecursive(Class<?> clazz, Collection<Class<?>> stopAtFieldTypes) {
+		Predicate<Field> fieldNotStaticFunc = (f) -> !Modifier.isStatic(f.getModifiers());
+		Function<Field, Class<?>> fieldTypeFunc = (f) -> f.getType();
+		Set<Class<?>> tmpChecked = new HashSet<>();
+		Map<String, Field> baseFields = new HashMap<String, Field>();
+		getAllFields0(clazz, tmpChecked, baseFields);
+		Map.Entry<List<Field>, List<Field>> filteredFields = filterKnownFields(baseFields.values(), fieldNotStaticFunc, fieldTypeFunc, true, true, stopAtFieldTypes);
+
+		SimpleTree<SimpleField> allFields = new SimpleTreeImpl<>(null);
+
+		for(Field f : filteredFields.getKey()) {
+			allFields.addChild(new CompoundField<Object>(f));
+		}
+
+		for(Field baseField : filteredFields.getValue()) {
+			SimpleField baseSimpleField = new SimpleFieldImpl(baseField);
+
+			TreeBuilder.buildTree(allFields, 0, null, baseSimpleField, (t) -> {
+				if(filterKnownField(t.getType(), true, true, stopAtFieldTypes)) {
+					return false;
+				}
+
+				Map<String, Field> tmpFields = getClassFields(t.getType(), tmpChecked);
+				Map.Entry<List<Field>, List<Field>> filteredFieldMap = filterKnownFields(tmpFields.values(), fieldNotStaticFunc, fieldTypeFunc, true, true, stopAtFieldTypes);
+
+				return filteredFieldMap.getValue().size() > 0;
+			}, (t) -> {
+				Map<String, Field> tmpFields = getClassFields(t.getType(), tmpChecked);
+				Map.Entry<List<Field>, List<Field>> filteredFieldMap = filterKnownFields(tmpFields.values(), fieldNotStaticFunc, fieldTypeFunc, true, true, stopAtFieldTypes);
+
+				List<SimpleField> resList = ListUtil.map(filteredFieldMap.getValue(), (field) -> new SimpleFieldImpl(field));
+				resList.addAll(ListUtil.map(filteredFieldMap.getKey(), (field) -> new SimpleFieldImpl(field)));
+
+				return resList;
+			}, false);
 		}
 
 		return allFields;

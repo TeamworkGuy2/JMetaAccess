@@ -1,19 +1,13 @@
 package simpleReflect;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import propertyAccessor.CompoundProperty;
 import propertyAccessor.FieldGet;
-import propertyAccessor.PropertyDefinition;
-import propertyAccessor.PropertyImpl;
-import propertyAccessor.PropertyNamer;
-import twg2.collections.tuple.Entries;
-import twg2.collections.util.MapUtil;
+import simpleTree.SimpleTree;
+import simpleTree.SimpleTreeUtil;
 
 /**
  * @author TeamworkGuy2
@@ -22,61 +16,62 @@ import twg2.collections.util.MapUtil;
 public class SimpleFields {
 
 	// static utilities that use PropertyImpl
-	public static Map<String, PropertyDefinition<Object>> createFromObject(Class<?> clazz, PropertyNamer namingConvention) {
+	public static Map<String, SimpleField> createFromObject(Class<?> clazz) {
 		Map<String, Field> fieldMap = FieldGet.getAllFields(clazz);
-		return createFromFieldsIncluding(clazz, namingConvention, fieldMap, fieldMap.keySet());
+		return createFromFieldsIncluding(clazz, fieldMap, fieldMap.keySet());
 	}
 
 
-	public static Map<String, PropertyDefinition<Object>> createFromObjectRecursive(Class<?> clazz, PropertyNamer namingConvention, Collection<Class<?>> stopAtFields) {
-		List<CompoundProperty<Object>> fields = FieldGet.getAllFieldsRecursive(clazz, stopAtFields);
-		Map<String, PropertyDefinition<Object>> fieldMap = MapUtil.map(fields, (f) -> Entries.of(f.getFieldName(), f));
+	public static Map<String, SimpleField> createFromObjectRecursive(Class<?> clazz, Collection<Class<?>> stopAtFields) {
+		SimpleTree<SimpleField> fields = FieldGet.getAllFieldsRecursive(clazz, stopAtFields);
+		Map<String, SimpleField> fieldMap = new HashMap<>();
+		SimpleTreeUtil.traverseLeafNodes(fields, (field, depth, parentBranch) -> {
+			String name = field.getName();
+			if(fieldMap.containsKey(name)) {
+				throw new IllegalStateException("duplicate field '" + name + "' found will retrieving all fields recursively from '" + clazz + "'");
+			}
+			fieldMap.put(name, field);
+		});
 		//return createFromFieldsIncluding(clazz, namingConvention, fieldMap, fieldMap.keySet());
 		return fieldMap;
 	}
 
 
-	public static Map<String, PropertyDefinition<Object>> createFromObjectIncluding(Class<?> clazz, PropertyNamer namingConvention, Collection<String> includingFieldNames) {
+	public static Map<String, SimpleField> createFromObjectIncluding(Class<?> clazz, Collection<String> includingFieldNames) {
 		Map<String, Field> fieldMap = FieldGet.getAllFields(clazz);
-		return createFromFieldsIncluding(clazz, namingConvention, fieldMap, includingFieldNames);
+		return createFromFieldsIncluding(clazz, fieldMap, includingFieldNames);
 	}
 
 
-	public static Map<String, PropertyDefinition<Object>> createFromObjectExcluding(Class<?> clazz, PropertyNamer namingConvention, Collection<String> excludingFieldNames) {
+	public static Map<String, SimpleField> createFromObjectExcluding(Class<?> clazz, Collection<String> excludingFieldNames) {
 		Map<String, Field> fieldMap = FieldGet.getAllFields(clazz);
-		return createFromFieldsExcluding(clazz, namingConvention, fieldMap, excludingFieldNames);
+		return createFromFieldsExcluding(clazz, fieldMap, excludingFieldNames);
 	}
 
 
-	public static <T> PropertyDefinition<T> createFromName(Class<?> instClass, Class<T> fieldType, PropertyNamer namingConvention, Map<String, Field> fieldMap, String fieldName) {
+	public static <T> SimpleField createFromName(Class<?> instClass, Class<T> fieldType, Map<String, Field> fieldMap, String fieldName) {
 		try {
 			Field field = fieldMap.get(fieldName);
 			if(field == null) {
 				throw new NoSuchFieldException("'" + fieldName + "' on type: " + instClass);
 			}
 
-			String getterName = namingConvention.createGetterName(field);
-			String setterName = namingConvention.createSetterName(field);
-
-			Method getterRef = instClass.getMethod(getterName);
-			Method setterRef = instClass.getMethod(setterName, fieldType);
-
-			PropertyDefinition<T> t = new PropertyImpl<T>(setterRef, getterRef, fieldName, field);
+			SimpleFieldImpl t = new SimpleFieldImpl(field, true);
 
 			return t;
-		} catch (SecurityException | IllegalArgumentException | NoSuchMethodException | NoSuchFieldException e) {
+		} catch (SecurityException | IllegalArgumentException | NoSuchFieldException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
 
-	public static Map<String, PropertyDefinition<Object>> createFromFields(Class<?> instClass, PropertyNamer namingConvention, Map<String, Field> fieldMap) {
-		Map<String, PropertyDefinition<Object>> resFields = new HashMap<>();
+	public static Map<String, SimpleField> createFromFields(Class<?> instClass, Map<String, Field> fieldMap) {
+		Map<String, SimpleField> resFields = new HashMap<>();
 
 		for(Map.Entry<String, Field> objField : fieldMap.entrySet()) {
 			@SuppressWarnings("unchecked")
 			Class<Object> fieldType = (Class<Object>)objField.getValue().getType();
-			PropertyDefinition<Object> getSetField = createFromName(instClass, fieldType, namingConvention, fieldMap, objField.getKey());
+			SimpleField getSetField = createFromName(instClass, fieldType, fieldMap, objField.getKey());
 			resFields.put(objField.getKey(), getSetField);
 		}
 
@@ -84,8 +79,8 @@ public class SimpleFields {
 	}
 
 
-	public static Map<String, PropertyDefinition<Object>> createFromFieldsExcluding(Class<?> instClass, PropertyNamer namingConvention, Map<String, Field> fieldMap, Collection<String> excludeFieldNames) {
-		Map<String, PropertyDefinition<Object>> resFields = new HashMap<>();
+	public static Map<String, SimpleField> createFromFieldsExcluding(Class<?> instClass, Map<String, Field> fieldMap, Collection<String> excludeFieldNames) {
+		Map<String, SimpleField> resFields = new HashMap<>();
 
 		for(Map.Entry<String, Field> objField : fieldMap.entrySet()) {
 			if(excludeFieldNames.contains(objField.getKey())) {
@@ -94,7 +89,7 @@ public class SimpleFields {
 			else {
 				@SuppressWarnings("unchecked")
 				Class<Object> fieldType = (Class<Object>)objField.getValue().getType();
-				PropertyDefinition<Object> getSetField = createFromName(instClass, fieldType, namingConvention, fieldMap, objField.getKey());
+				SimpleField getSetField = createFromName(instClass, fieldType, fieldMap, objField.getKey());
 				resFields.put(objField.getKey(), getSetField);
 			}
 		}
@@ -103,8 +98,8 @@ public class SimpleFields {
 	}
 
 
-	public static Map<String, PropertyDefinition<Object>> createFromFieldsIncluding(Class<?> instClass, PropertyNamer namingConvention, Map<String, Field> fieldMap, Collection<String> includeFieldNames) {
-		Map<String, PropertyDefinition<Object>> resFields = new HashMap<>();
+	public static Map<String, SimpleField> createFromFieldsIncluding(Class<?> instClass, Map<String, Field> fieldMap, Collection<String> includeFieldNames) {
+		Map<String, SimpleField> resFields = new HashMap<>();
 
 		for(String fieldName : includeFieldNames) {
 			Field field = fieldMap.get(fieldName);
@@ -113,7 +108,7 @@ public class SimpleFields {
 			}
 			@SuppressWarnings("unchecked")
 			Class<Object> fieldType = (Class<Object>)field.getType();
-			PropertyDefinition<Object> getSetField = createFromName(instClass, fieldType, namingConvention, fieldMap, fieldName);
+			SimpleField getSetField = createFromName(instClass, fieldType, fieldMap, fieldName);
 			resFields.put(fieldName, getSetField);
 		}
 

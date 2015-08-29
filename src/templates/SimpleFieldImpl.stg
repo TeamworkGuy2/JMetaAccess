@@ -1,0 +1,136 @@
+SimpleFieldImpl(var) ::= <<
+package $var.packageName$;
+
+import java.lang.reflect.Field;
+
+/** A runtime error throwing version of {@link Field\}
+ * @author TeamworkGuy2
+ * @since 2015-03-29
+ */
+@javax.annotation.Generated("StringTemplate")
+public class $var.className$ implements SimpleField {
+	private Field field;
+
+
+	public SimpleFieldImpl(Field field) {
+		this.field = field;
+		this.field.setAccessible(true);
+	\}
+
+
+	public SimpleFieldImpl(Field field, boolean setAccessible) {
+		this.field = field;
+		if(setAccessible) {
+			this.field.setAccessible(true);
+		\}
+	\}
+
+
+	@Override
+	public Field getField() {
+		return this.field;
+	\}
+
+
+	@Override
+	public Class<?> getDeclaringClass() {
+		return this.field.getDeclaringClass();
+	\}
+
+
+	@Override
+	public Class<?> getType() {
+		return this.field.getType();
+	\}
+
+
+	@Override
+	public String getName() {
+		return this.field.getName();
+	\}
+
+
+	@Override
+	public boolean equals(Object obj) {
+		return this.field.equals(obj);
+	\}
+
+
+	@Override
+	public int hashCode() {
+		return this.field.hashCode();
+	\}
+
+
+	@Override
+	public String toString() {
+		return this.field.toString();
+	\}
+
+
+	@Override
+	public Object get(Object obj) {
+		try {
+			return this.field.get(obj);
+		\} catch (IllegalArgumentException | IllegalAccessException e) {
+			throw new RuntimeException(e);
+		\}
+	\}
+
+$var.primitiveTypes:{type |
+
+
+	@Override
+	public $type.type$ get$type.typeShortTitleCase$(Object obj) {
+		try {
+			return this.field.get$type.typeShortTitleCase$(obj);
+		\} catch (IllegalArgumentException | IllegalAccessException e) {
+			throw new RuntimeException(e);
+		\}
+	\}
+
+}$
+	@Override
+	public void set(Object obj, Object z) {
+		try {
+			this.field.set(obj, z);
+		\} catch (IllegalArgumentException | IllegalAccessException e) {
+			throw new RuntimeException(e);
+		\}
+	\}
+
+$var.primitiveTypes:{type |
+
+
+	@Override
+	public void set$type.objectType$(Object obj, $type.type$ z) {
+		try {
+			this.field.set$type.typeShortTitleCase$(obj, z);
+		\} catch (IllegalArgumentException | IllegalAccessException e) {
+			throw new RuntimeException(e);
+		\}
+	\}
+
+}$
+	public static <T> $var.className$ createSimpleField(Class<T> clazz, String name) {
+		try {
+			Field field = clazz.getField(name);
+			return new $var.className$(field);
+		} catch (NoSuchFieldException | SecurityException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+
+	public static <T> $var.className$ createSimpleDeclaredField(Class<T> clazz, String name) {
+		try {
+			Field field = clazz.getDeclaredField(name);
+			return new $var.className$(field);
+		} catch (NoSuchFieldException | SecurityException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+\}
+
+>>

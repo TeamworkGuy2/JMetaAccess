@@ -93,7 +93,7 @@ public class FieldGetSetTest {
 	@Test
 	public void testGetFieldsRecursive() {
 		Branch branch = new Branch(19, "first branch!", "witty branch description -HERE-", 12345, false, true, "IDs, IDs, IDS for all!");
-		List<CompoundProperty<Object>> fields = FieldGet.getAllFieldsRecursive(Branch.class, Arrays.asList(StringBuilder.class, String.class));
+		List<CompoundProperty<Object>> fields = FieldGet.getAllPropertiesRecursive(Branch.class, Arrays.asList(StringBuilder.class, String.class));
 
 		List<String> expectBranchFields = Arrays.asList("branchId", "branchName", "branchDescription", "tmpStrB", "awesome", "id", "t", "count");
 

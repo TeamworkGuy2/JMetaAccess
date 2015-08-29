@@ -34,7 +34,7 @@ public interface PropertyDefinition<T> {
 
 
 	public static Map<String, PropertyDefinition<Object>> createFromObjectRecursive(Class<?> clazz, PropertyNamer namingConvention, Collection<Class<?>> stopAtFields) {
-		List<CompoundProperty<Object>> fields = FieldGet.getAllFieldsRecursive(clazz, stopAtFields);
+		List<CompoundProperty<Object>> fields = FieldGet.getAllPropertiesRecursive(clazz, stopAtFields);
 		Map<String, PropertyDefinition<Object>> fieldMap = MapUtil.map(fields, (f) -> Entries.of(f.getFieldName(), f));
 		//return createFromFieldsIncluding(clazz, namingConvention, fieldMap, fieldMap.keySet());
 		return fieldMap;

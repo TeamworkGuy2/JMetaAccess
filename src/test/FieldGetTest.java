@@ -2,6 +2,8 @@ package test;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import lombok.Getter;
@@ -10,6 +12,9 @@ import lombok.Setter;
 import org.junit.Test;
 
 import propertyAccessor.FieldGet;
+import simpleReflect.SimpleField;
+import simpleReflect.SimpleFields;
+import simpleTree.SimpleTree;
 import checks.CheckTask;
 
 /**
@@ -98,6 +103,19 @@ public class FieldGetTest {
 			Set<String> fields = new HashSet<>(FieldGet.getAllFields(obj.getClass()).keySet());
 			return fields;
 		});
+	}
+
+
+	@Test
+	public void testFieldGetRecursive() {
+		List<Class<?>> branchStopFields = Arrays.asList(StringBuilder.class, String.class);
+
+		SimpleTree<SimpleField> fields = FieldGet.getAllFieldsRecursive(FieldGetSetTest.Branch.class, branchStopFields);
+
+		Map<String, SimpleField> fieldMap = SimpleFields.createFromObjectRecursive(FieldGetSetTest.Branch.class, branchStopFields);
+
+		System.out.println(fields);
+		System.out.println(fieldMap);
 	}
 
 }

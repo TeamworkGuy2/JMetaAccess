@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import propertyAccessor.FieldGet;
-import simpleTree.SimpleTree;
-import simpleTree.SimpleTreeUtil;
+import twg2.treeLike.simpleTree.SimpleTree;
+import twg2.treeLike.simpleTree.SimpleTreeUtil;
 
 /**
  * @author TeamworkGuy2
@@ -23,7 +23,7 @@ public class SimpleFields {
 
 
 	public static Map<String, SimpleField> createFromObjectRecursive(Class<?> clazz, Collection<Class<?>> stopAtFields) {
-		SimpleTree<SimpleField> fields = FieldGet.getAllFieldsRecursive(clazz, stopAtFields);
+		SimpleTree<SimpleField> fields = FieldGet.getAllFieldsRecursive(clazz, stopAtFields, false, false);
 		Map<String, SimpleField> fieldMap = new HashMap<>();
 		SimpleTreeUtil.traverseLeafNodes(fields, (field, depth, parentBranch) -> {
 			String name = field.getName();

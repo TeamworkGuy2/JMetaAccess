@@ -10,17 +10,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 import simpleReflect.CompoundField;
 import simpleReflect.SimpleField;
 import simpleReflect.SimpleFieldImpl;
-import simpleTree.SimpleTree;
-import simpleTree.SimpleTreeImpl;
-import simpleTree.TreeBuilder;
-import simpleTree.TreeUtil;
-import twg2.collections.tuple.Tuples;
 import twg2.collections.util.ListUtil;
+import twg2.treeLike.TreeBuilder;
+import twg2.treeLike.TreeTraverse;
+import twg2.treeLike.parameters.TreePathTraverseParameters;
+import twg2.treeLike.simpleTree.SimpleTree;
+import twg2.treeLike.simpleTree.SimpleTreeImpl;
 import typeInfo.JavaPrimitives;
 
 /**
@@ -60,42 +59,57 @@ public class FieldGet {
 	 * @return all the fields of a class (as if {@link Class#getDeclaredFields()} was invoked recursively on the class and all super classes and interfaces
 	 */
 	public static List<CompoundProperty<Object>> getAllPropertiesRecursive(Class<?> clazz, Collection<Class<?>> stopAtFieldTypes) {
-		List<CompoundProperty<Object>> allFields = new ArrayList<>();
-
-		Predicate<Field> fieldNotStaticFunc = (f) -> !Modifier.isStatic(f.getModifiers());
-		Function<Field, Class<?>> fieldTypeFunc = (f) -> f.getType();
 		Set<Class<?>> tmpChecked = new HashSet<>();
 		Map<String, Field> baseFields = new HashMap<String, Field>();
-		getAllFields0(clazz, tmpChecked, baseFields);
-		Map.Entry<List<Field>, List<Field>> filteredFields = filterKnownFields(baseFields.values(), fieldNotStaticFunc, fieldTypeFunc, true, true, stopAtFieldTypes);
-		allFields.addAll(ListUtil.map(filteredFields.getKey(), (f) -> new CompoundProperty<Object>(f)));
+		// these are reused for all field filters
+		List<Field> tmpKnownFilteredFields = new ArrayList<>();
+		List<Field> tmpUnknownFilteredFields = new ArrayList<>();
 
-		for(Field baseField : filteredFields.getValue()) {
-			TreeUtil.traverseNodesByDepthInPlace(baseField, true, (t) -> {
+		List<CompoundProperty<Object>> allFields = new ArrayList<>();
+		Function<Field, Class<?>> fieldTypeFunc = (f) -> f.getType();
+		boolean filterOutStaticFields = true;
+
+		getAllFields0(clazz, tmpChecked, baseFields);
+		filterKnownFields(baseFields.values(), fieldTypeFunc, filterOutStaticFields, true, true, stopAtFieldTypes, tmpKnownFilteredFields, tmpUnknownFilteredFields);
+		allFields.addAll(ListUtil.map(tmpKnownFilteredFields, CompoundProperty<Object>::new));
+		Field[] initialBaseFields = tmpUnknownFilteredFields.toArray(new Field[tmpUnknownFilteredFields.size()]);
+
+		tmpKnownFilteredFields.clear();
+		tmpUnknownFilteredFields.clear();
+
+		for(Field baseField : initialBaseFields) {
+			TreeTraverse.traverseTreeWithPath(TreePathTraverseParameters.of(baseField, true, (t) -> {
 				if(filterKnownField(t.getType(), true, true, stopAtFieldTypes)) {
 					return false;
 				}
 
 				Map<String, Field> tmpFields = getClassFields(t.getType(), tmpChecked);
-				Map.Entry<List<Field>, List<Field>> filteredFieldMap = filterKnownFields(tmpFields.values(), fieldNotStaticFunc, fieldTypeFunc, true, true, stopAtFieldTypes);
+				filterKnownFields(tmpFields.values(), fieldTypeFunc, filterOutStaticFields, true, true, stopAtFieldTypes, tmpKnownFilteredFields, tmpUnknownFilteredFields);
+				int unknownFieldCount = tmpUnknownFilteredFields.size();
 
-				return filteredFieldMap.getValue().size() > 0;
+				tmpKnownFilteredFields.clear();
+				tmpUnknownFilteredFields.clear();
+
+				return unknownFieldCount > 0;
 			}, (t) -> {
 				Map<String, Field> tmpFields = getClassFields(t.getType(), tmpChecked);
-				Map.Entry<List<Field>, List<Field>> filteredFieldMap = filterKnownFields(tmpFields.values(), fieldNotStaticFunc, fieldTypeFunc, true, true, stopAtFieldTypes);
+				filterKnownFields(tmpFields.values(), fieldTypeFunc, filterOutStaticFields, true, true, stopAtFieldTypes, tmpKnownFilteredFields, tmpUnknownFilteredFields);
 
-				List<Field> resList = new ArrayList<>(filteredFieldMap.getValue());
-				resList.addAll(filteredFieldMap.getKey());
+				List<Field> resList = new ArrayList<>(tmpUnknownFilteredFields);
+				resList.addAll(tmpKnownFilteredFields);
+
+				tmpKnownFilteredFields.clear();
+				tmpUnknownFilteredFields.clear();
 
 				return resList;
-			}, (branch, depth, parentBranches) -> {
+			}).setConsumerTreePath((branch, depth, parentBranches) -> {
 				// create the compound field getter/setter from the leaf field and parent field list
 				CompoundProperty<Object> compoundFieldGetSet = new CompoundProperty<>();
 				compoundFieldGetSet.parentToFieldAccessors.addAll2(parentBranches);
 				compoundFieldGetSet.parentToFieldAccessors.add2(branch);
 
 				allFields.add(compoundFieldGetSet);
-			});
+			}));
 		}
 
 		return allFields;
@@ -107,42 +121,57 @@ public class FieldGet {
 	 * @return all the fields of a class (as if {@link Class#getDeclaredFields()} was invoked recursively on the class and all super classes and interfaces
 	 */
 	public static List<CompoundField<Object>> getAllFieldsRecursiveCompound(Class<?> clazz, Collection<Class<?>> stopAtFieldTypes) {
-		List<CompoundField<Object>> allFields = new ArrayList<>();
-
-		Predicate<Field> fieldNotStaticFunc = (f) -> !Modifier.isStatic(f.getModifiers());
-		Function<Field, Class<?>> fieldTypeFunc = (f) -> f.getType();
 		Set<Class<?>> tmpChecked = new HashSet<>();
 		Map<String, Field> baseFields = new HashMap<String, Field>();
-		getAllFields0(clazz, tmpChecked, baseFields);
-		Map.Entry<List<Field>, List<Field>> filteredFields = filterKnownFields(baseFields.values(), fieldNotStaticFunc, fieldTypeFunc, true, true, stopAtFieldTypes);
-		allFields.addAll(ListUtil.map(filteredFields.getKey(), (f) -> new CompoundField<Object>(f)));
+		// these are reused for all field filters
+		List<Field> tmpKnownFilteredFields = new ArrayList<>();
+		List<Field> tmpUnknownFilteredFields = new ArrayList<>();
 
-		for(Field baseField : filteredFields.getValue()) {
-			TreeUtil.traverseNodesByDepthInPlace(baseField, true, (t) -> {
+		List<CompoundField<Object>> allFields = new ArrayList<>();
+		Function<Field, Class<?>> fieldTypeFunc = (f) -> f.getType();
+		boolean filterOutStaticFields = true;
+
+		getAllFields0(clazz, tmpChecked, baseFields);
+		filterKnownFields(baseFields.values(), fieldTypeFunc, filterOutStaticFields, true, true, stopAtFieldTypes, tmpKnownFilteredFields, tmpUnknownFilteredFields);
+		allFields.addAll(ListUtil.map(tmpKnownFilteredFields, (f) -> new CompoundField<Object>(f)));
+		Field[] initialBaseFields = tmpUnknownFilteredFields.toArray(new Field[tmpUnknownFilteredFields.size()]);
+
+		tmpKnownFilteredFields.clear();
+		tmpUnknownFilteredFields.clear();
+
+		for(Field baseField : initialBaseFields) {
+			TreeTraverse.traverseTreeWithPath(TreePathTraverseParameters.of(baseField, true, (t) -> {
 				if(filterKnownField(t.getType(), true, true, stopAtFieldTypes)) {
 					return false;
 				}
 
 				Map<String, Field> tmpFields = getClassFields(t.getType(), tmpChecked);
-				Map.Entry<List<Field>, List<Field>> filteredFieldMap = filterKnownFields(tmpFields.values(), fieldNotStaticFunc, fieldTypeFunc, true, true, stopAtFieldTypes);
+				filterKnownFields(tmpFields.values(), fieldTypeFunc, filterOutStaticFields, true, true, stopAtFieldTypes, tmpKnownFilteredFields, tmpUnknownFilteredFields);
+				int unknownFieldCount = tmpUnknownFilteredFields.size();
 
-				return filteredFieldMap.getValue().size() > 0;
+				tmpKnownFilteredFields.clear();
+				tmpUnknownFilteredFields.clear();
+
+				return unknownFieldCount > 0;
 			}, (t) -> {
 				Map<String, Field> tmpFields = getClassFields(t.getType(), tmpChecked);
-				Map.Entry<List<Field>, List<Field>> filteredFieldMap = filterKnownFields(tmpFields.values(), fieldNotStaticFunc, fieldTypeFunc, true, true, stopAtFieldTypes);
+				filterKnownFields(tmpFields.values(), fieldTypeFunc, filterOutStaticFields, true, true, stopAtFieldTypes, tmpKnownFilteredFields, tmpUnknownFilteredFields);
 
-				List<Field> resList = new ArrayList<>(filteredFieldMap.getValue());
-				resList.addAll(filteredFieldMap.getKey());
+				List<Field> resList = new ArrayList<>(tmpUnknownFilteredFields);
+				resList.addAll(tmpKnownFilteredFields);
+
+				tmpKnownFilteredFields.clear();
+				tmpUnknownFilteredFields.clear();
 
 				return resList;
-			}, (branch, depth, parentBranches) -> {
+			}).setConsumerTreePath((branch, depth, parentBranches) -> {
 				// create the compound field getter/setter from the leaf field and parent field list
 				List<Field> fields = new ArrayList<>(parentBranches);
 				fields.add(branch);
 				CompoundField<Object> compoundField = new CompoundField<>(fields);
 
 				allFields.add(compoundField);
-			});
+			}));
 		}
 
 		return allFields;
@@ -153,38 +182,56 @@ public class FieldGet {
 	 * @param clazz the class to get fields for
 	 * @return all the fields of a class (as if {@link Class#getDeclaredFields()} was invoked recursively on the class and all super classes and interfaces
 	 */
-	public static SimpleTree<SimpleField> getAllFieldsRecursive(Class<?> clazz, Collection<Class<?>> stopAtFieldTypes) {
-		Predicate<Field> fieldNotStaticFunc = (f) -> !Modifier.isStatic(f.getModifiers());
-		Function<Field, Class<?>> fieldTypeFunc = (f) -> f.getType();
+	public static SimpleTree<SimpleField> getAllFieldsRecursive(Class<?> clazz, Collection<Class<?>> stopAtFieldTypes, boolean filterPrimitives, boolean filterPrimitiveWrappers) {
 		Set<Class<?>> tmpChecked = new HashSet<>();
 		Map<String, Field> baseFields = new HashMap<String, Field>();
+		// these are reused for all field filters
+		List<Field> tmpKnownFilteredFields = new ArrayList<>();
+		List<Field> tmpUnknownFilteredFields = new ArrayList<>();
+
+		Function<Field, Class<?>> fieldTypeFunc = (f) -> f.getType();
+
 		getAllFields0(clazz, tmpChecked, baseFields);
-		Map.Entry<List<Field>, List<Field>> filteredFields = filterKnownFields(baseFields.values(), fieldNotStaticFunc, fieldTypeFunc, true, true, stopAtFieldTypes);
+		boolean filterOutStaticFields = true;
+		filterKnownFields(baseFields.values(), fieldTypeFunc, filterOutStaticFields, filterPrimitives, filterPrimitiveWrappers, stopAtFieldTypes, tmpKnownFilteredFields, tmpUnknownFilteredFields);
+		Field[] initialKnownFields = tmpKnownFilteredFields.toArray(new Field[tmpKnownFilteredFields.size()]);
+		Field[] initialBaseFields = tmpUnknownFilteredFields.toArray(new Field[tmpUnknownFilteredFields.size()]);
+
+		tmpKnownFilteredFields.clear();
+		tmpUnknownFilteredFields.clear();
 
 		SimpleTree<SimpleField> allFields = new SimpleTreeImpl<>(null);
 
-		for(Field f : filteredFields.getKey()) {
-			allFields.addChild(new CompoundField<Object>(f));
+		for(Field f : initialKnownFields) {
+			allFields.addChild(new SimpleFieldImpl(f));
 		}
 
-		for(Field baseField : filteredFields.getValue()) {
+		for(Field baseField : initialBaseFields) {
 			SimpleField baseSimpleField = new SimpleFieldImpl(baseField);
 
 			TreeBuilder.buildTree(allFields, 0, null, baseSimpleField, (t) -> {
+				// primitive types have no children, filter them out regardless of filter flags
 				if(filterKnownField(t.getType(), true, true, stopAtFieldTypes)) {
 					return false;
 				}
 
 				Map<String, Field> tmpFields = getClassFields(t.getType(), tmpChecked);
-				Map.Entry<List<Field>, List<Field>> filteredFieldMap = filterKnownFields(tmpFields.values(), fieldNotStaticFunc, fieldTypeFunc, true, true, stopAtFieldTypes);
+				filterKnownFields(tmpFields.values(), fieldTypeFunc, filterOutStaticFields, filterPrimitives, filterPrimitiveWrappers, stopAtFieldTypes, tmpKnownFilteredFields, tmpUnknownFilteredFields);
+				int unknownFieldCount = tmpUnknownFilteredFields.size();
 
-				return filteredFieldMap.getValue().size() > 0;
+				tmpKnownFilteredFields.clear();
+				tmpUnknownFilteredFields.clear();
+
+				return unknownFieldCount > 0;
 			}, (t) -> {
 				Map<String, Field> tmpFields = getClassFields(t.getType(), tmpChecked);
-				Map.Entry<List<Field>, List<Field>> filteredFieldMap = filterKnownFields(tmpFields.values(), fieldNotStaticFunc, fieldTypeFunc, true, true, stopAtFieldTypes);
+				filterKnownFields(tmpFields.values(), fieldTypeFunc, filterOutStaticFields, filterPrimitives, filterPrimitiveWrappers, stopAtFieldTypes, tmpKnownFilteredFields, tmpUnknownFilteredFields);
 
-				List<SimpleField> resList = ListUtil.map(filteredFieldMap.getValue(), (field) -> new SimpleFieldImpl(field));
-				resList.addAll(ListUtil.map(filteredFieldMap.getKey(), (field) -> new SimpleFieldImpl(field)));
+				List<SimpleField> resList = ListUtil.map(tmpUnknownFilteredFields, SimpleFieldImpl::new);
+				resList.addAll(ListUtil.map(tmpKnownFilteredFields, SimpleFieldImpl::new));
+
+				tmpKnownFilteredFields.clear();
+				tmpUnknownFilteredFields.clear();
 
 				return resList;
 			}, false);
@@ -208,6 +255,7 @@ public class FieldGet {
 	}
 
 
+	// package-private
 	static void getAllFields0(Class<?> clazz, Set<Class<?>> visitedTypes, Map<String, Field> dst) {
 		visitedTypes.add(clazz);
 
@@ -226,7 +274,7 @@ public class FieldGet {
 			}
 		}
 
-		// add fields later, so over-ridding fields appear in the dst map
+		// add fields later, so over-riding fields appear in the destination map
 		Field[] fields = clazz.getDeclaredFields();
 		for(Field field : fields) {
 			dst.put(field.getName(), field);
@@ -235,48 +283,36 @@ public class FieldGet {
 
 
 	/**
-	 * @param types
-	 * @param filterPrimitives
-	 * @param filterPrimitiveWrappers
-	 * @param knownTypes
-	 * @return the key list is the known values, the values list is the unknown values
+	 * @param dstKnown the destination list to store the filtered known values in
+	 * @param dstUnknown the destination list to store the filtered unknown values in
 	 */
-	static Map.Entry<List<Class<?>>, List<Class<?>>> filterKnownFields(Iterable<Class<?>> types, Predicate<Class<?>> filter, boolean filterPrimitives, boolean filterPrimitiveWrappers, Collection<Class<?>> knownTypes) {
-		return filterKnownFields(types, filter, (t) -> t, filterPrimitives, filterPrimitiveWrappers, knownTypes);
-	}
+	static void filterKnownFields(Iterable<Field> values, Function<Field, Class<?>> transformer,
+			boolean excludeStaticFields, boolean filterPrimitives, boolean filterPrimitiveWrappers, Collection<Class<?>> knownTypes, List<Field> dstKnown, List<Field> dstUnknown) {
 
-
-	/**
-	 * @return the key list is the known values, the values list is the unknown values
-	 */
-	static <T> Map.Entry<List<T>, List<T>> filterKnownFields(Iterable<T> values, Predicate<T> filter, Function<T, Class<?>> transformer,
-			boolean filterPrimitives, boolean filterPrimitiveWrappers, Collection<Class<?>> knownTypes) {
-		List<T> known = new ArrayList<>();
-		List<T> unknown = new ArrayList<>();
-
-		for(T value : values) {
-			if(!filter.test(value)) {
+		for(Field value : values) {
+			if(excludeStaticFields && Modifier.isStatic(value.getModifiers())) {
 				continue;
 			}
 
 			if(filterKnownField(transformer.apply(value), filterPrimitives, filterPrimitiveWrappers, knownTypes)) {
-				known.add(value);
+				dstKnown.add(value);
 			}
 			else {
-				unknown.add(value);
+				dstUnknown.add(value);
 			}
 		}
-
-		return Tuples.of(known, unknown);
 	}
 
 
 	/** check whether a type is a primitive, a primitive wrapper, or one of a set of types
 	 */
 	static boolean filterKnownField(Class<?> type, boolean filterPrimitives, boolean filterPrimitiveWrappers, Collection<Class<?>> knownTypes) {
+		if(type == null) {
+			return false;
+		}
+
 		if(filterPrimitives) {
-			JavaPrimitives primitive = JavaPrimitives.tryGetPrimitiveType(type);
-			if(primitive != null) {
+			if(type.isPrimitive()) {
 				return true;
 			}
 		}

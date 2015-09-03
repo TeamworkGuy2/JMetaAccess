@@ -14,7 +14,8 @@ import org.junit.Test;
 import propertyAccessor.FieldGet;
 import simpleReflect.SimpleField;
 import simpleReflect.SimpleFields;
-import simpleTree.SimpleTree;
+import twg2.treeLike.simpleTree.SimpleTree;
+import twg2.treeLike.simpleTree.SimpleTreeUtil;
 import checks.CheckTask;
 
 /**
@@ -110,12 +111,28 @@ public class FieldGetTest {
 	public void testFieldGetRecursive() {
 		List<Class<?>> branchStopFields = Arrays.asList(StringBuilder.class, String.class);
 
-		SimpleTree<SimpleField> fields = FieldGet.getAllFieldsRecursive(FieldGetSetTest.Branch.class, branchStopFields);
+		FieldGetSetTest.Branch branch = new FieldGetSetTest.Branch(42, "branch-42", "greatest branch ever!", 3, false, true, "id2332");
+		FieldGetSetTest.BranchSet branchSet = new FieldGetSetTest.BranchSet(branch, 1234567890, "names, tames");
 
-		Map<String, SimpleField> fieldMap = SimpleFields.createFromObjectRecursive(FieldGetSetTest.Branch.class, branchStopFields);
+		Map<String, SimpleField> fieldMap = SimpleFields.createFromObjectRecursive(branchSet.getClass(), branchStopFields);
 
-		System.out.println(fields);
-		System.out.println(fieldMap);
+		SimpleTree<SimpleField> fields = FieldGet.getAllFieldsRecursive(branchSet.getClass(), branchStopFields, false, false);
+
+		SimpleTreeUtil.transformTree(fields, (Object)branchSet, (field, parentTransformed, parent) -> {
+			//System.out.println("from '" + field.getData().getName() + "', parent=" + parentTransformed.getClass());
+			Object val = field.getData().get(parentTransformed);
+			//System.out.println("field '" + field.getData().getName() + "': " + val + ",\t\t parent=" + parentTransformed.getClass().getSimpleName());
+			return val;
+		}, (node, depth, parent) -> {
+			//System.out.println("result: " + node);
+		}, (depth) -> {
+			//System.out.println("start depth: " + depth);
+		}, (depth) -> {
+			//System.out.println("end depth: " + depth);
+		});
+
+		//System.out.println(fields);
+		//System.out.println(fieldMap);
 	}
 
 }

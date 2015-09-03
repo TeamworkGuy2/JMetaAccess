@@ -66,6 +66,21 @@ public class FieldGetSetTest {
 	}
 
 
+	@EqualsAndHashCode
+	public static class BranchSet {
+		private @Getter @Setter Branch branch;
+		private @Getter @Setter long memPool;
+		private @Getter @Setter char[] rawName;
+
+		public BranchSet(Branch branch, long memPool, String name) {
+			this.branch = branch;
+			this.memPool = memPool;
+			this.rawName = name.toCharArray();
+		}
+
+	}
+
+
 
 
 	@Test

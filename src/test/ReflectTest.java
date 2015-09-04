@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
-import simpleReflect.SimpleField;
+import fieldAccess.SimpleField;
 
 /**
  * @author TeamworkGuy2

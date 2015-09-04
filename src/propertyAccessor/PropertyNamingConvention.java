@@ -8,9 +8,9 @@ import java.util.function.Function;
  * @author TeamworkGuy2
  * @since 2015-6-27
  */
-public enum PropertyNamerConvention implements PropertyNamer {
-	JAVA_BEAN_LIKE(PropertyNamerConvention::inferJavaBeanGetterName, PropertyNamerConvention::inferJavaBeanGetterName, PropertyNamerConvention::inferJavaBeanSetterName, PropertyNamerConvention::inferJavaBeanSetterName),
-	BUILDER_LIKE(PropertyNamerConvention::inferBuilderGetterName, PropertyNamerConvention::inferBuilderGetterName, PropertyNamerConvention::inferBuilderSetterName, PropertyNamerConvention::inferBuilderSetterName);
+public enum PropertyNamingConvention implements PropertyNamer {
+	JAVA_BEAN_LIKE(PropertyNamingConvention::inferJavaBeanGetterName, PropertyNamingConvention::inferJavaBeanGetterName, PropertyNamingConvention::inferJavaBeanSetterName, PropertyNamingConvention::inferJavaBeanSetterName),
+	BUILDER_LIKE(PropertyNamingConvention::inferBuilderGetterName, PropertyNamingConvention::inferBuilderGetterName, PropertyNamingConvention::inferBuilderSetterName, PropertyNamingConvention::inferBuilderSetterName);
 
 	final Function<Field, String> getterNameFromFieldFunc;
 	final BiFunction<String, Class<?>, String> getterNameFromNameTypeFunc;
@@ -18,7 +18,7 @@ public enum PropertyNamerConvention implements PropertyNamer {
 	final BiFunction<String, Class<?>, String> setterNameFromNameTypeFunc;
 
 
-	private PropertyNamerConvention(Function<Field, String> getterNameFromFieldFunc, BiFunction<String, Class<?>, String> getterNameFromNameTypeFunc,
+	private PropertyNamingConvention(Function<Field, String> getterNameFromFieldFunc, BiFunction<String, Class<?>, String> getterNameFromNameTypeFunc,
 			Function<Field, String> setterNameFromFieldFunc, BiFunction<String, Class<?>, String> setterNameFromNameTypeFunc) {
 		this.getterNameFromFieldFunc = getterNameFromFieldFunc;
 		this.getterNameFromNameTypeFunc = getterNameFromNameTypeFunc;

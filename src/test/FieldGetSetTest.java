@@ -14,9 +14,9 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import propertyAccessor.CompoundProperty;
-import propertyAccessor.FieldGet;
 import propertyAccessor.PropertyDefinition;
-import propertyAccessor.PropertyNamerConvention;
+import propertyAccessor.PropertyGets;
+import propertyAccessor.PropertyNamingConvention;
 import checks.CheckCollections;
 
 /**
@@ -92,7 +92,7 @@ public class FieldGetSetTest {
 
 		for(Impl obj : inputs) {
 			Impl copy = new Impl(0, false, false, null);
-			Map<String, PropertyDefinition<Object>> fields = PropertyDefinition.createFromObject(obj.getClass(), PropertyNamerConvention.JAVA_BEAN_LIKE);
+			Map<String, PropertyDefinition<Object>> fields = PropertyGets.createFromObject(obj.getClass(), PropertyNamingConvention.JAVA_BEAN_LIKE);
 
 			for(String fieldName : fields.keySet()) {
 				PropertyDefinition<Object> field = fields.get(fieldName);
@@ -108,7 +108,7 @@ public class FieldGetSetTest {
 	@Test
 	public void testGetFieldsRecursive() {
 		Branch branch = new Branch(19, "first branch!", "witty branch description -HERE-", 12345, false, true, "IDs, IDs, IDS for all!");
-		List<CompoundProperty<Object>> fields = FieldGet.getAllPropertiesRecursive(Branch.class, Arrays.asList(StringBuilder.class, String.class));
+		List<CompoundProperty<Object>> fields = PropertyGets.getAllPropertiesRecursive(Branch.class, Arrays.asList(StringBuilder.class, String.class));
 
 		List<String> expectBranchFields = Arrays.asList("branchId", "branchName", "branchDescription", "tmpStrB", "awesome", "id", "t", "count");
 

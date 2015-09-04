@@ -5,7 +5,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import propertyAccessor.FieldGet;
+import fieldAccess.FieldGets;
+import fieldAccess.SimpleField;
+import fieldAccess.SimpleFieldImpl;
+import twg2.treeLike.TreeTraversalOrder;
 import twg2.treeLike.simpleTree.SimpleTree;
 import twg2.treeLike.simpleTree.SimpleTreeUtil;
 
@@ -17,15 +20,17 @@ public class SimpleFields {
 
 	// static utilities that use PropertyImpl
 	public static Map<String, SimpleField> createFromObject(Class<?> clazz) {
-		Map<String, Field> fieldMap = FieldGet.getAllFields(clazz);
+		Map<String, Field> fieldMap = FieldGets.getAllFields(clazz);
 		return createFromFieldsIncluding(clazz, fieldMap, fieldMap.keySet());
 	}
 
 
 	public static Map<String, SimpleField> createFromObjectRecursive(Class<?> clazz, Collection<Class<?>> stopAtFields) {
-		SimpleTree<SimpleField> fields = FieldGet.getAllFieldsRecursive(clazz, stopAtFields, false, false);
+		SimpleTree<SimpleField> fields = FieldGets.getAllFieldsRecursive(clazz, stopAtFields, false, false);
+
 		Map<String, SimpleField> fieldMap = new HashMap<>();
-		SimpleTreeUtil.traverseLeafNodes(fields, (field, depth, parentBranch) -> {
+
+		SimpleTreeUtil.traverseLeafNodes(fields, TreeTraversalOrder.POST_ORDER, (field, depth, parentBranch) -> {
 			String name = field.getName();
 			if(fieldMap.containsKey(name)) {
 				throw new IllegalStateException("duplicate field '" + name + "' found will retrieving all fields recursively from '" + clazz + "'");
@@ -38,13 +43,13 @@ public class SimpleFields {
 
 
 	public static Map<String, SimpleField> createFromObjectIncluding(Class<?> clazz, Collection<String> includingFieldNames) {
-		Map<String, Field> fieldMap = FieldGet.getAllFields(clazz);
+		Map<String, Field> fieldMap = FieldGets.getAllFields(clazz);
 		return createFromFieldsIncluding(clazz, fieldMap, includingFieldNames);
 	}
 
 
 	public static Map<String, SimpleField> createFromObjectExcluding(Class<?> clazz, Collection<String> excludingFieldNames) {
-		Map<String, Field> fieldMap = FieldGet.getAllFields(clazz);
+		Map<String, Field> fieldMap = FieldGets.getAllFields(clazz);
 		return createFromFieldsExcluding(clazz, fieldMap, excludingFieldNames);
 	}
 

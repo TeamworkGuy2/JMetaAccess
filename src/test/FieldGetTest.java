@@ -11,12 +11,12 @@ import lombok.Setter;
 
 import org.junit.Test;
 
-import propertyAccessor.FieldGet;
-import simpleReflect.SimpleField;
 import simpleReflect.SimpleFields;
 import twg2.treeLike.simpleTree.SimpleTree;
 import twg2.treeLike.simpleTree.SimpleTreeUtil;
 import checks.CheckTask;
+import fieldAccess.FieldGets;
+import fieldAccess.SimpleField;
 
 /**
  * @author TeamworkGuy2
@@ -101,7 +101,7 @@ public class FieldGetTest {
 		).toArray(new Set[0]);
 
 		CheckTask.assertTests(inputs, expectedFields, (obj) -> {
-			Set<String> fields = new HashSet<>(FieldGet.getAllFields(obj.getClass()).keySet());
+			Set<String> fields = new HashSet<>(FieldGets.getAllFields(obj.getClass()).keySet());
 			return fields;
 		});
 	}
@@ -116,7 +116,7 @@ public class FieldGetTest {
 
 		Map<String, SimpleField> fieldMap = SimpleFields.createFromObjectRecursive(branchSet.getClass(), branchStopFields);
 
-		SimpleTree<SimpleField> fields = FieldGet.getAllFieldsRecursive(branchSet.getClass(), branchStopFields, false, false);
+		SimpleTree<SimpleField> fields = FieldGets.getAllFieldsRecursive(branchSet.getClass(), branchStopFields, false, false);
 
 		SimpleTreeUtil.transformTree(fields, (Object)branchSet, (field, parentTransformed, parent) -> {
 			//System.out.println("from '" + field.getData().getName() + "', parent=" + parentTransformed.getClass());

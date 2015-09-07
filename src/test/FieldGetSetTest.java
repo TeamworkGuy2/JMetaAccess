@@ -5,10 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.val;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -17,6 +14,8 @@ import propertyAccessor.CompoundProperty;
 import propertyAccessor.PropertyDefinition;
 import propertyAccessor.PropertyGets;
 import propertyAccessor.PropertyNamingConvention;
+import test.FieldGetData.ColonyBug;
+import test.FieldGetData.Termite;
 import checks.CheckCollections;
 
 /**
@@ -25,73 +24,16 @@ import checks.CheckCollections;
  */
 public class FieldGetSetTest {
 
-	@AllArgsConstructor
-	@EqualsAndHashCode
-	public static class Base {
-		private @Getter @Setter int count;
-		private @Getter @Setter boolean t;
-	}
-
-
-	@EqualsAndHashCode(callSuper = true)
-	public static class Impl extends Base {
-		private @Getter @Setter boolean awesome;
-		private @Getter @Setter String id;
-
-
-		public Impl(int count, boolean t, boolean awesome, String id) {
-			super(count, t);
-			this.awesome = awesome;
-			this.id = id;
-		}
-
-	}
-
-
-	@EqualsAndHashCode(callSuper = true)
-	public static class Branch extends Impl {
-		private @Getter @Setter int branchId;
-		private @Getter @Setter String branchName;
-		private @Getter @Setter String branchDescription;
-		private @Getter @Setter StringBuilder tmpStrB;
-
-		public Branch(int branchId, String branchName, String branchDescription, int count, boolean t, boolean awesome, String id) {
-			super(count, t, awesome, id);
-			this.branchId = branchId;
-			this.branchName = branchName;
-			this.branchDescription = branchDescription;
-			this.tmpStrB = new StringBuilder();
-		}
-
-	}
-
-
-	@EqualsAndHashCode
-	public static class BranchSet {
-		private @Getter @Setter Branch branch;
-		private @Getter @Setter long memPool;
-		private @Getter @Setter char[] rawName;
-
-		public BranchSet(Branch branch, long memPool, String name) {
-			this.branch = branch;
-			this.memPool = memPool;
-			this.rawName = name.toCharArray();
-		}
-
-	}
-
-
-
 
 	@Test
 	public void testFieldGetterSetter() {
-		Impl[] inputs = {
-				new Impl(23, false, false, "a"),
-				new Impl(42, true, true, "z")
+		ColonyBug[] inputs = {
+				new ColonyBug(23, false, false, "a"),
+				new ColonyBug(42, true, true, "z")
 		};
 
-		for(Impl obj : inputs) {
-			Impl copy = new Impl(0, false, false, null);
+		for(ColonyBug obj : inputs) {
+			ColonyBug copy = new ColonyBug(0, false, false, null);
 			Map<String, PropertyDefinition<Object>> fields = PropertyGets.createFromObject(obj.getClass(), PropertyNamingConvention.JAVA_BEAN_LIKE);
 
 			for(String fieldName : fields.keySet()) {
@@ -107,24 +49,25 @@ public class FieldGetSetTest {
 
 	@Test
 	public void testGetFieldsRecursive() {
-		Branch branch = new Branch(19, "first branch!", "witty branch description -HERE-", 12345, false, true, "IDs, IDs, IDS for all!");
-		List<CompoundProperty<Object>> fields = PropertyGets.getAllPropertiesRecursive(Branch.class, Arrays.asList(StringBuilder.class, String.class));
+		Termite termite = FieldGetData.Dummy.newTermite1();
 
-		List<String> expectBranchFields = Arrays.asList("branchId", "branchName", "branchDescription", "tmpStrB", "awesome", "id", "t", "count");
+		List<CompoundProperty<Object>> fields = PropertyGets.getAllPropertiesRecursive(Termite.class, Arrays.asList(StringBuilder.class, String.class));
+
+		List<String> termiteFields = Arrays.asList("colonyNum", "colonyName", "colonyNotesBuf", "manager", "id", "t", "count");
 
 		List<String> fieldNames = new ArrayList<>();
-		for(CompoundProperty<Object> field : fields) {
+		for(val field : fields) {
 			fieldNames.add(field.getFieldName());
 		}
-		CheckCollections.assertLooseEquals(expectBranchFields, fieldNames);
+		CheckCollections.assertLooseEquals(termiteFields, fieldNames);
 
+		Termite copy = new Termite(0, "", 0, false, false, "");
 
-		Branch copy = new Branch(0, "", "", 0, false, false, "");
 		fields.forEach((f) -> {
-			f.setVal(f.getVal(branch), copy);
+			f.setVal(f.getVal(termite), copy);
 		});
 
-		Assert.assertEquals(branch, copy);
+		Assert.assertEquals(termite, copy);
 	}
 
 }

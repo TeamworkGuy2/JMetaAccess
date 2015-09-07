@@ -11,13 +11,13 @@ import java.util.Map;
 import java.util.Set;
 
 import twg2.collections.util.ListUtil;
+import twg2.primitiveIoTypes.JavaPrimitive;
 import twg2.treeLike.TreeBuilder;
 import twg2.treeLike.TreeTraversalOrder;
 import twg2.treeLike.TreeTraverse;
 import twg2.treeLike.parameters.TreePathTraverseParameters;
 import twg2.treeLike.simpleTree.SimpleTree;
 import twg2.treeLike.simpleTree.SimpleTreeImpl;
-import typeInfo.JavaPrimitives;
 
 /**
  * @author TeamworkGuy2
@@ -288,7 +288,7 @@ public class FieldGets {
 			}
 		}
 		if(filterPrimitiveWrappers) {
-			JavaPrimitives primitive = JavaPrimitives.tryGetWrapperType(type);
+			JavaPrimitive primitive = JavaPrimitive.tryGetWrapperType(type);
 			if(primitive != null) {
 				return true;
 			}

@@ -1,10 +1,10 @@
-package templates.generators;
+package twg2.meta.templates.generators;
 
 import java.util.Arrays;
 import java.util.List;
 
-import templates.ReflectionUtilTypes;
 import twg2.collections.util.ListUtil;
+import twg2.meta.templates.ReflectionUtilTypes;
 import codeTemplate.primitiveTemplate.PrimitiveTemplates;
 import codeTemplate.primitiveTemplate.PrimitiveTypeClassTemplate;
 import codeTemplate.render.TemplateRenders;
@@ -15,6 +15,7 @@ import codeTemplate.render.TemplateRenders;
  * @since 2015-6-6
  */
 public class GenerateReflect {
+	private static String tmplDir = "src/twg2/meta/templates/";
 	private static List<Class<?>> primitiveTypes = Arrays.asList(new Class<?>[] { Boolean.TYPE, Byte.TYPE, Character.TYPE, Short.TYPE, Integer.TYPE, Float.TYPE, Long.TYPE, Double.TYPE });
 
 
@@ -22,8 +23,8 @@ public class GenerateReflect {
 		List<PrimitiveTypeClassTemplate> primitiveTypes = ListUtil.map(GenerateReflect.primitiveTypes, (type) -> PrimitiveTemplates.ofType(type, "subtype"));
 		ReflectionUtilTypes tmpl = new ReflectionUtilTypes(primitiveTypes, primitiveTypes);
 		tmpl.className = "SimpleField";
-		tmpl.packageName = "simpleReflect";
-		TemplateRenders.renderClassTemplates("src/templates/SimpleField.stg", "SimpleField", tmpl);
+		tmpl.packageName = "twg2.meta.fieldAccess";
+		TemplateRenders.renderClassTemplates(tmplDir + "SimpleField.stg", "SimpleField", tmpl);
 	}
 
 
@@ -31,8 +32,8 @@ public class GenerateReflect {
 		List<PrimitiveTypeClassTemplate> primitiveTypes = ListUtil.map(GenerateReflect.primitiveTypes, (type) -> PrimitiveTemplates.ofType(type, "subtype"));
 		ReflectionUtilTypes tmpl = new ReflectionUtilTypes(primitiveTypes, primitiveTypes);
 		tmpl.className = "SimpleFieldImpl";
-		tmpl.packageName = "simpleReflect";
-		TemplateRenders.renderClassTemplates("src/templates/SimpleFieldImpl.stg", "SimpleFieldImpl", tmpl);
+		tmpl.packageName = "twg2.meta.fieldAccess";
+		TemplateRenders.renderClassTemplates(tmplDir + "SimpleFieldImpl.stg", "SimpleFieldImpl", tmpl);
 	}
 
 
@@ -40,8 +41,8 @@ public class GenerateReflect {
 		List<PrimitiveTypeClassTemplate> primitiveTypes = ListUtil.map(GenerateReflect.primitiveTypes, (type) -> PrimitiveTemplates.ofType(type, "subtype"));
 		ReflectionUtilTypes tmpl = new ReflectionUtilTypes(primitiveTypes, primitiveTypes);
 		tmpl.className = "SimpleMethod";
-		tmpl.packageName = "simpleReflect";
-		TemplateRenders.renderClassTemplates("src/templates/SimpleMethod.stg", "SimpleMethod", tmpl);
+		tmpl.packageName = "twg2.meta.simpleReflect";
+		TemplateRenders.renderClassTemplates(tmplDir + "SimpleMethod.stg", "SimpleMethod", tmpl);
 	}
 
 

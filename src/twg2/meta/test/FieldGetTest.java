@@ -1,4 +1,4 @@
-package test;
+package twg2.meta.test;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -7,15 +7,19 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import test.FieldGetData.BaseLeaf;
-import test.FieldGetData.Leaf2;
-import test.FieldGetData.TermiteSsn;
-import test.FieldGetData.Tree1;
+import twg2.meta.fieldAccess.FieldGets;
+import twg2.meta.fieldAccess.SimpleField;
+import twg2.meta.test.FieldGetData.BaseLeaf;
+import twg2.meta.test.FieldGetData.Leaf2;
+import twg2.meta.test.FieldGetData.TermiteColony;
+import twg2.meta.test.FieldGetData.Tree1;
+import twg2.treeLike.TreeTraversalOrder;
+import twg2.treeLike.TreeTraverse;
+import twg2.treeLike.parameters.KeyTreeTraverseParameters;
+import twg2.treeLike.simpleTree.SimpleKeyTree;
 import twg2.treeLike.simpleTree.SimpleTree;
 import twg2.treeLike.simpleTree.SimpleTreeUtil;
 import checks.CheckTask;
-import fieldAccess.FieldGets;
-import fieldAccess.SimpleField;
 
 /**
  * @author TeamworkGuy2
@@ -49,7 +53,7 @@ public class FieldGetTest {
 	public void testFieldGetRecursive() {
 		List<Class<?>> branchStopFields = Arrays.asList(StringBuilder.class, String.class);
 
-		TermiteSsn branchSet = FieldGetData.Dummy.newTermiteSsn1();
+		TermiteColony branchSet = FieldGetData.Dummy.newTermiteColony1();
 
 		//Map<String, SimpleField> fieldMap = SimpleFields.createFromObjectRecursive(branchSet.getClass(), branchStopFields);
 
@@ -67,6 +71,30 @@ public class FieldGetTest {
 		}, (depth) -> {
 			//System.out.println("end depth: " + depth);
 		});
+
+		//System.out.println(fields);
+		//System.out.println(fieldMap);
+	}
+
+
+	@Test
+	public void testFieldGetMapRecursive() {
+		List<Class<?>> branchStopFields = Arrays.asList(StringBuilder.class, String.class);
+
+		TermiteColony branchSet = FieldGetData.Dummy.newTermiteColony1();
+
+		//Map<String, SimpleField> fieldMap = SimpleFields.createFromObjectRecursive(branchSet.getClass(), branchStopFields);
+
+		SimpleKeyTree<String, SimpleField> fields = FieldGets.getAllFieldMapRecursive(branchSet.getClass(), branchStopFields, false, false);
+
+		TreeTraverse.traverse(KeyTreeTraverseParameters.allNodes(fields, TreeTraversalOrder.PRE_ORDER, (t) -> t.hasChildren(), (t) -> t.getChildren().entrySet())
+			.setConsumer((node, depth, parent) -> {
+				System.out.println("result: " + node);
+			}).setStartSubtreeFunc((depth) -> {
+				System.out.println("start depth: " + depth);
+			}).setEndSubtreeFunc((depth) -> {
+				System.out.println("end depth: " + depth);
+			}));
 
 		//System.out.println(fields);
 		//System.out.println(fieldMap);

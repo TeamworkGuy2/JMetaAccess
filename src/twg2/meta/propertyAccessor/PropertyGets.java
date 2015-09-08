@@ -1,4 +1,4 @@
-package propertyAccessor;
+package twg2.meta.propertyAccessor;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -13,10 +13,10 @@ import java.util.Set;
 import twg2.collections.tuple.Entries;
 import twg2.collections.util.ListUtil;
 import twg2.collections.util.MapUtil;
+import twg2.meta.fieldAccess.FieldGets;
 import twg2.treeLike.TreeTraversalOrder;
 import twg2.treeLike.TreeTraverse;
 import twg2.treeLike.parameters.TreePathTraverseParameters;
-import fieldAccess.FieldGets;
 
 /**
  * @author TeamworkGuy2

@@ -1,4 +1,4 @@
-package propertyAccessor;
+package twg2.meta.propertyAccessor;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;

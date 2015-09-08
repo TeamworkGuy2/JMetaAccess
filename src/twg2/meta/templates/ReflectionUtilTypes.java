@@ -1,4 +1,4 @@
-package templates;
+package twg2.meta.templates;
 
 import java.util.ArrayList;
 import java.util.List;

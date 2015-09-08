@@ -1,4 +1,4 @@
-package test;
+package twg2.meta.test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,12 +10,12 @@ import lombok.val;
 import org.junit.Assert;
 import org.junit.Test;
 
-import propertyAccessor.CompoundProperty;
-import propertyAccessor.PropertyDefinition;
-import propertyAccessor.PropertyGets;
-import propertyAccessor.PropertyNamingConvention;
-import test.FieldGetData.ColonyBug;
-import test.FieldGetData.Termite;
+import twg2.meta.propertyAccessor.CompoundProperty;
+import twg2.meta.propertyAccessor.PropertyDefinition;
+import twg2.meta.propertyAccessor.PropertyGets;
+import twg2.meta.propertyAccessor.PropertyNamingConvention;
+import twg2.meta.test.FieldGetData.ColonyBug;
+import twg2.meta.test.FieldGetData.Termite;
 import checks.CheckCollections;
 
 /**
@@ -53,7 +53,7 @@ public class FieldGetSetTest {
 
 		List<CompoundProperty<Object>> fields = PropertyGets.getAllPropertiesRecursive(Termite.class, Arrays.asList(StringBuilder.class, String.class));
 
-		List<String> termiteFields = Arrays.asList("colonyNum", "colonyName", "colonyNotesBuf", "manager", "id", "t", "count");
+		List<String> termiteFields = Arrays.asList("colonyNum", "termiteName", "colonyNotesBuf", "manager", "id", "t", "count");
 
 		List<String> fieldNames = new ArrayList<>();
 		for(val field : fields) {

@@ -1,4 +1,4 @@
-package fieldAccess;
+package twg2.meta.fieldAccess;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;

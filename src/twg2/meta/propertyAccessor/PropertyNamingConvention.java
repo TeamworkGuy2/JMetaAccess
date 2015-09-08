@@ -1,4 +1,4 @@
-package propertyAccessor;
+package twg2.meta.propertyAccessor;
 
 import java.lang.reflect.Field;
 import java.util.function.BiFunction;

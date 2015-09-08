@@ -1,4 +1,4 @@
-package propertyAccessor;
+package twg2.meta.propertyAccessor;
 
 /**
  * @author TeamworkGuy2

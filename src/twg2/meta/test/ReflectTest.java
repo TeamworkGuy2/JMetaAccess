@@ -1,10 +1,10 @@
-package test;
+package twg2.meta.test;
 
 import java.util.Arrays;
 
 import org.junit.Test;
 
-import fieldAccess.SimpleField;
+import twg2.meta.fieldAccess.SimpleField;
 
 /**
  * @author TeamworkGuy2

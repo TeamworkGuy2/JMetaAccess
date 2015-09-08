@@ -1,4 +1,8 @@
-package test;
+package twg2.meta.test;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -13,7 +17,7 @@ import lombok.ToString;
  */
 public class FieldGetData {
 
-	// ==== Base, Tree, Leaf! test data hierarchy ====
+	// ==== Base, Tree, Leaf! twg2.meta.test data hierarchy ====
 	public static interface BaseI {
 		public int getBaseI_Field1();
 		public void setBaseI_Field1(int val);
@@ -77,7 +81,7 @@ public class FieldGetData {
 
 
 
-	// ==== Bugs! test classes ====
+	// ==== Bugs! twg2.meta.test classes ====
 	@AllArgsConstructor
 	@NoArgsConstructor
 	@EqualsAndHashCode
@@ -109,13 +113,13 @@ public class FieldGetData {
 	@ToString
 	public static class Termite extends ColonyBug {
 		private @Getter @Setter int colonyNum;
-		private @Getter @Setter String colonyName;
+		private @Getter @Setter String termiteName;
 		private @Getter @Setter StringBuilder colonyNotesBuf;
 
-		public Termite(int colonyNum, String colonyName, int count, boolean t, boolean awesome, String id) {
+		public Termite(int colonyNum, String termiteName, int count, boolean t, boolean awesome, String id) {
 			super(count, t, awesome, id);
 			this.colonyNum = colonyNum;
-			this.colonyName = colonyName;
+			this.termiteName = termiteName;
 			this.colonyNotesBuf = new StringBuilder();
 		}
 
@@ -125,15 +129,17 @@ public class FieldGetData {
 	@NoArgsConstructor
 	@EqualsAndHashCode
 	@ToString
-	public static class TermiteSsn {
-		private @Getter @Setter Termite branch;
+	public static class TermiteColony {
+		private @Getter @Setter Termite boss;
+		private @Getter @Setter List<Termite> termites;
 		private @Getter @Setter long memPool;
-		private @Getter @Setter char[] ssnDigits;
+		private @Getter @Setter char[] colonyName;
 
-		public TermiteSsn(Termite branch, long memPool, String ssn) {
-			this.branch = branch;
+		public TermiteColony(Termite boss, List<Termite> termites, long memPool, String colonyName) {
+			this.boss = boss;
+			this.termites = termites;
 			this.memPool = memPool;
-			this.ssnDigits = ssn.toCharArray();
+			this.colonyName = colonyName.toCharArray();
 		}
 
 	}
@@ -157,10 +163,19 @@ public class FieldGetData {
 		}
 
 
-		public static TermiteSsn newTermiteSsn1() {
-			Termite bug = newTermite1();
-			TermiteSsn bugSsn = new TermiteSsn(bug, 1234567890, "names, tames");
-			return bugSsn;
+		public static Termite newTermiteBoss() {
+			Termite bug = new Termite(423, "termite-1", 83, false, true, "id423");
+			bug.setColonyNotesBuf(new StringBuilder("bossiest termite ever!"));
+			return bug;
+		}
+
+
+		public static TermiteColony newTermiteColony1() {
+			Termite boss = newTermiteBoss();
+			Termite bug1 = newTermite1();
+			Termite bug2 = newTermite2();
+			TermiteColony colony = new TermiteColony(boss, new ArrayList<>(Arrays.asList(bug1, bug2)), 1234567890, "names, tames");
+			return colony;
 		}
 	}
 }

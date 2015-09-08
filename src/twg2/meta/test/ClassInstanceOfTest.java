@@ -1,4 +1,4 @@
-package test;
+package twg2.meta.test;
 
 import java.io.Serializable;
 import java.util.AbstractMap;
@@ -16,7 +16,7 @@ import javax.swing.plaf.basic.BasicBorders.MarginBorder;
 
 import org.junit.Test;
 
-import simpleReflect.ClassInstanceOf;
+import twg2.meta.simpleReflect.ClassInstanceOf;
 import checks.CheckTask;
 
 /**

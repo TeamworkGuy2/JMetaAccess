@@ -1,7 +1,8 @@
-package fieldAccess;
+package twg2.meta.fieldAccess;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -10,13 +11,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import twg2.collections.tuple.Tuples;
 import twg2.collections.util.ListUtil;
+import twg2.collections.util.MapUtil;
 import twg2.primitiveIoTypes.JavaPrimitive;
 import twg2.treeLike.TreeBuilder;
 import twg2.treeLike.TreeTraversalOrder;
 import twg2.treeLike.TreeTraverse;
 import twg2.treeLike.parameters.TreePathTraverseParameters;
-import twg2.treeLike.simpleTree.SimpleTree;
+import twg2.treeLike.simpleTree.SimpleKeyTreeImpl;
 import twg2.treeLike.simpleTree.SimpleTreeImpl;
 
 /**
@@ -80,7 +83,7 @@ public class FieldGets {
 	 * @param clazz the class to get fields for
 	 * @return all the fields of a class (as if {@link Class#getDeclaredFields()} was invoked recursively on the class and all super classes and interfaces
 	 */
-	public static SimpleTree<SimpleField> getAllFieldsRecursive(Class<?> clazz, Collection<Class<?>> stopAtFieldTypes, boolean filterPrimitives, boolean filterPrimitiveWrappers) {
+	public static SimpleKeyTreeImpl<String, SimpleField> getAllFieldMapRecursive(Class<?> clazz, Collection<Class<?>> stopAtFieldTypes, boolean filterPrimitives, boolean filterPrimitiveWrappers) {
 		Set<Class<?>> tmpChecked = new HashSet<>();
 		Map<String, Field> baseFields = new HashMap<String, Field>();
 		// these are reused for all field filters
@@ -96,7 +99,70 @@ public class FieldGets {
 		tmpKnownFilteredFields.clear();
 		tmpUnknownFilteredFields.clear();
 
-		SimpleTree<SimpleField> allFields = new SimpleTreeImpl<>(null);
+		SimpleKeyTreeImpl<String, SimpleField> allFields = new SimpleKeyTreeImpl<>(null, null);
+
+		for(Field f : initialKnownFields) {
+			allFields.addChild(f.getName(), new SimpleFieldImpl(f));
+		}
+
+		for(Field baseField : initialBaseFields) {
+			SimpleField baseSimpleField = new SimpleFieldImpl(baseField);
+
+			TreeBuilder.buildTree(allFields, 0, null, new AbstractMap.SimpleImmutableEntry<>(baseSimpleField.getName(), baseSimpleField), (t) -> {
+				// primitive types have no children, filter them out regardless of filter flags
+				if(filterKnownField(t.getValue().getType(), true, true, stopAtFieldTypes)) {
+					return false;
+				}
+
+				tmpChecked.clear();
+				Map<String, Field> tmpFields = getClassFields(t.getValue().getType(), tmpChecked);
+				filterKnownFields(tmpFields.values(), filterOutStaticFields, filterPrimitives, filterPrimitiveWrappers, stopAtFieldTypes, tmpKnownFilteredFields, tmpUnknownFilteredFields);
+				int unknownFieldCount = tmpUnknownFilteredFields.size();
+
+				tmpKnownFilteredFields.clear();
+				tmpUnknownFilteredFields.clear();
+
+				return unknownFieldCount > 0;
+			}, (t) -> {
+				tmpChecked.clear();
+				Map<String, Field> tmpFields = getClassFields(t.getValue().getType(), tmpChecked);
+				filterKnownFields(tmpFields.values(), filterOutStaticFields, filterPrimitives, filterPrimitiveWrappers, stopAtFieldTypes, tmpKnownFilteredFields, tmpUnknownFilteredFields);
+
+				Map<String, SimpleField> resList = MapUtil.map(tmpUnknownFilteredFields, (f) -> Tuples.of(f.getName(), new SimpleFieldImpl(f)));
+				MapUtil.map(tmpKnownFilteredFields, (f) -> Tuples.of(f.getName(), new SimpleFieldImpl(f)), resList);
+
+				tmpKnownFilteredFields.clear();
+				tmpUnknownFilteredFields.clear();
+
+				return resList.entrySet();
+			}, false);
+		}
+
+		return allFields;
+	}
+
+
+	/** Retrieve a list of compound {@link SimpleField} for the {@link Field Fields} from a class' inheritance tree
+	 * @param clazz the class to get fields for
+	 * @return all the fields of a class (as if {@link Class#getDeclaredFields()} was invoked recursively on the class and all super classes and interfaces
+	 */
+	public static SimpleTreeImpl<SimpleField> getAllFieldsRecursive(Class<?> clazz, Collection<Class<?>> stopAtFieldTypes, boolean filterPrimitives, boolean filterPrimitiveWrappers) {
+		Set<Class<?>> tmpChecked = new HashSet<>();
+		Map<String, Field> baseFields = new HashMap<String, Field>();
+		// these are reused for all field filters
+		List<Field> tmpKnownFilteredFields = new ArrayList<>();
+		List<Field> tmpUnknownFilteredFields = new ArrayList<>();
+
+		getAllFields0(clazz, tmpChecked, baseFields);
+		boolean filterOutStaticFields = true;
+		filterKnownFields(baseFields.values(), filterOutStaticFields, filterPrimitives, filterPrimitiveWrappers, stopAtFieldTypes, tmpKnownFilteredFields, tmpUnknownFilteredFields);
+		Field[] initialKnownFields = tmpKnownFilteredFields.toArray(new Field[tmpKnownFilteredFields.size()]);
+		Field[] initialBaseFields = tmpUnknownFilteredFields.toArray(new Field[tmpUnknownFilteredFields.size()]);
+
+		tmpKnownFilteredFields.clear();
+		tmpUnknownFilteredFields.clear();
+
+		SimpleTreeImpl<SimpleField> allFields = new SimpleTreeImpl<>(null);
 
 		for(Field f : initialKnownFields) {
 			allFields.addChild(new SimpleFieldImpl(f));

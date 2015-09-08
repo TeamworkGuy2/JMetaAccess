@@ -1,4 +1,4 @@
-package simpleReflect;
+package twg2.meta.simpleReflect;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -281,5 +281,36 @@ public class SimpleMethod {
 		}
 	}
 
+
+	public static SimpleMethod of(Class<?> clazz, String name) {
+		Method method = null;
+		try {
+			Method[] methods = clazz.getMethods();
+			for(Method m : methods) {
+				if(name.equals(m.getName())) {
+					method = m;
+					break;
+				}
+			}
+		} catch (SecurityException e) {
+			throw new RuntimeException(e);
+		}
+		if(method == null) {
+			throw new RuntimeException(new NoSuchMethodException(name));
+		}
+		return new SimpleMethod(method);
+	}
+
+
+	@SafeVarargs
+	public static SimpleMethod of(Class<?> clazz, String name, Class<?>... argTypes) {
+		Method method;
+		try {
+			method = clazz.getMethod(name, argTypes);
+		} catch (NoSuchMethodException | SecurityException e) {
+			throw new RuntimeException(e);
+		}
+		return new SimpleMethod(method);
+	}
 
 }

@@ -14,7 +14,7 @@ import java.util.Set;
 import twg2.collections.tuple.Tuples;
 import twg2.collections.util.ListUtil;
 import twg2.collections.util.MapUtil;
-import twg2.primitiveIoTypes.JavaPrimitive;
+import twg2.primitiveIoTypes.JPrimitiveType;
 import twg2.treeLike.TreeBuilder;
 import twg2.treeLike.TreeTraversalOrder;
 import twg2.treeLike.TreeTraverse;
@@ -354,7 +354,7 @@ public class FieldGets {
 			}
 		}
 		if(filterPrimitiveWrappers) {
-			JavaPrimitive primitive = JavaPrimitive.tryGetWrapperType(type);
+			JPrimitiveType primitive = JPrimitiveType.tryFromWrapperType(type);
 			if(primitive != null) {
 				return true;
 			}

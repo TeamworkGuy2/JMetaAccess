@@ -178,4 +178,16 @@ public class FieldGetData {
 			return colony;
 		}
 	}
+
+
+
+	public static class NotAccessible {
+		private List<String> myPasswords;
+
+		public NotAccessible() {
+			this.myPasswords = new ArrayList<>();
+			this.myPasswords.add("what does the fox say?");
+		}
+	}
+
 }

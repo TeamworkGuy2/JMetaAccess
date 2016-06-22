@@ -3,28 +3,26 @@ package twg2.meta.fieldAccess;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import twg2.collections.tuple.Tuples;
-
-/** A hierarchical composition of {@link Field Fields} that access a field inside a compound object
+/** A field accessor for a deeply nested field.
+ * A hierarchical composition of {@link Field Fields} to access a field one or more levels inside a compound object
  * @author TeamworkGuy2
  * @since 2015-8-28
  * @param <T> the data type of the field
  */
 public class CompoundField<T> implements SimpleField {
-	private List<Field> parentToFieldAccessors;
+	private List<Field> hierarchicalFields;
 	private Field cachedField;
 	private boolean setAccessible;
 
 
 	public CompoundField() {
-		this.parentToFieldAccessors = new ArrayList<>();
+		this.hierarchicalFields = new ArrayList<>();
 	}
 
 
 	public CompoundField(List<Field> parentToFieldAccessors) {
-		this.parentToFieldAccessors = parentToFieldAccessors;
+		this.hierarchicalFields = parentToFieldAccessors;
 		this.cachedField = parentToFieldAccessors.get(parentToFieldAccessors.size() - 1);
 	}
 
@@ -35,16 +33,14 @@ public class CompoundField<T> implements SimpleField {
 		for(Field fieldAccessor : fieldAccessors) {
 			fields.add(fieldAccessor);
 		}
-		this.parentToFieldAccessors = fields;
+		this.hierarchicalFields = fields;
 		this.cachedField = fields.get(fields.size() - 1);
 	}
 
 
 	public <E> void setVal(T val, E srcObject) {
-		Map.Entry<Object, Field> lastField = traverseAccessors(srcObject);
-
-		Object parentObj = lastField.getKey();
-		Field accessor = lastField.getValue();
+		Object parentObj = traverseAccessors(srcObject);
+		Field accessor = cachedField;
 
 		try {
 			accessor.set(parentObj, val);
@@ -55,10 +51,8 @@ public class CompoundField<T> implements SimpleField {
 
 
 	public <E> T getVal(E srcObject) {
-		Map.Entry<Object, Field> lastField = traverseAccessors(srcObject);
-
-		Object parentObj = lastField.getKey();
-		Field accessor = lastField.getValue();
+		Object parentObj = traverseAccessors(srcObject);
+		Field accessor = cachedField;
 
 		T res = null;
 		try {
@@ -82,41 +76,40 @@ public class CompoundField<T> implements SimpleField {
 
 	@Override
 	public String toString() {
-		return "compoundFields: " + parentToFieldAccessors;
+		return "compoundFields: " + hierarchicalFields;
 	}
 
 
-	private Map.Entry<Object, Field> traverseAccessors(Object srcObject) {
-		if(!setAccessible) {
+	private final Object traverseAccessors(Object srcObject) {
+		if(!this.setAccessible) {
 			this.setAccessible = true;
-			List<Field> fields = parentToFieldAccessors;
+			List<Field> fields = hierarchicalFields;
 			for(int i = 0, size = fields.size(); i < size; i++) {
 				fields.get(i).setAccessible(true);
 			}
 		}
-		Map.Entry<Object, Field> lastField = traverseAccessors(srcObject, parentToFieldAccessors);
-		return lastField;
+		return traverseAccessors(srcObject, hierarchicalFields);
 	}
 
 
-	/** traverse a series of methods and fields where each previous method/field returns
-	 * the object to use to access the next method/field
+	/** traverse a series of methods and fields where each previous field returns
+	 * the object to use to access the next field
 	 */
-	private static Map.Entry<Object, Field> traverseAccessors(Object srcObject, List<Field> accessors) {
+	private static final Object traverseAccessors(Object srcObject, List<Field> accessors) {
 		int size = accessors.size();
 		Object parentObj = srcObject;
-		Field accessor = (Field)accessors.get(size - 1);
+		Field accessor = accessors.get(size - 1);
 
 		for(int i = 0; i < size - 1; i++) {
 			Field field = accessors.get(i);
 			try {
 				parentObj = field.get(parentObj);
 			} catch (Exception e) {
-				throw new RuntimeException("accessing deep field (for setting) '" + accessor.getName() + "' (" + accessor.getType() + ") via field " + field.getName(), e);
+				throw new RuntimeException("accessing deep field '" + accessor.getName() + "' (" + accessor.getType() + ") failed at field '" + field.getName() + "'", e);
 			}
 		}
 
-		return Tuples.of(parentObj, accessor);
+		return parentObj;
 	}
 
 
@@ -140,9 +133,10 @@ public class CompoundField<T> implements SimpleField {
 
 	@Override
 	public Object get(Object obj) {
-		Map.Entry<Object, Field> objField = traverseAccessors(obj);
+		Object lastObj = traverseAccessors(obj);
+		Field lastField = cachedField;
 		try {
-			return objField.getValue().get(objField.getKey());
+			return lastField.get(lastObj);
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
@@ -151,9 +145,10 @@ public class CompoundField<T> implements SimpleField {
 
 	@Override
 	public boolean getBoolean(Object obj) {
-		Map.Entry<Object, Field> objField = traverseAccessors(obj);
+		Object lastObj = traverseAccessors(obj);
+		Field lastField = cachedField;
 		try {
-			return objField.getValue().getBoolean(objField.getKey());
+			return lastField.getBoolean(lastObj);
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
@@ -162,9 +157,10 @@ public class CompoundField<T> implements SimpleField {
 
 	@Override
 	public byte getByte(Object obj) {
-		Map.Entry<Object, Field> objField = traverseAccessors(obj);
+		Object lastObj = traverseAccessors(obj);
+		Field lastField = cachedField;
 		try {
-			return objField.getValue().getByte(objField.getKey());
+			return lastField.getByte(lastObj);
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
@@ -173,9 +169,10 @@ public class CompoundField<T> implements SimpleField {
 
 	@Override
 	public char getChar(Object obj) {
-		Map.Entry<Object, Field> objField = traverseAccessors(obj);
+		Object lastObj = traverseAccessors(obj);
+		Field lastField = cachedField;
 		try {
-			return objField.getValue().getChar(objField.getKey());
+			return lastField.getChar(lastObj);
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
@@ -184,9 +181,10 @@ public class CompoundField<T> implements SimpleField {
 
 	@Override
 	public short getShort(Object obj) {
-		Map.Entry<Object, Field> objField = traverseAccessors(obj);
+		Object lastObj = traverseAccessors(obj);
+		Field lastField = cachedField;
 		try {
-			return objField.getValue().getShort(objField.getKey());
+			return lastField.getShort(lastObj);
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
@@ -196,9 +194,10 @@ public class CompoundField<T> implements SimpleField {
 
 	@Override
 	public int getInt(Object obj) {
-		Map.Entry<Object, Field> objField = traverseAccessors(obj);
+		Object lastObj = traverseAccessors(obj);
+		Field lastField = cachedField;
 		try {
-			return objField.getValue().getInt(objField.getKey());
+			return lastField.getInt(lastObj);
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
@@ -207,9 +206,10 @@ public class CompoundField<T> implements SimpleField {
 
 	@Override
 	public float getFloat(Object obj) {
-		Map.Entry<Object, Field> objField = traverseAccessors(obj);
+		Object lastObj = traverseAccessors(obj);
+		Field lastField = cachedField;
 		try {
-			return objField.getValue().getFloat(objField.getKey());
+			return lastField.getFloat(lastObj);
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
@@ -218,9 +218,10 @@ public class CompoundField<T> implements SimpleField {
 
 	@Override
 	public long getLong(Object obj) {
-		Map.Entry<Object, Field> objField = traverseAccessors(obj);
+		Object lastObj = traverseAccessors(obj);
+		Field lastField = cachedField;
 		try {
-			return objField.getValue().getLong(objField.getKey());
+			return lastField.getLong(lastObj);
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
@@ -229,9 +230,10 @@ public class CompoundField<T> implements SimpleField {
 
 	@Override
 	public double getDouble(Object obj) {
-		Map.Entry<Object, Field> objField = traverseAccessors(obj);
+		Object lastObj = traverseAccessors(obj);
+		Field lastField = cachedField;
 		try {
-			return objField.getValue().getDouble(objField.getKey());
+			return lastField.getDouble(lastObj);
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
@@ -240,9 +242,10 @@ public class CompoundField<T> implements SimpleField {
 
 	@Override
 	public void set(Object obj, Object z) {
-		Map.Entry<Object, Field> objField = traverseAccessors(obj);
+		Object lastObj = traverseAccessors(obj);
+		Field lastField = cachedField;
 		try {
-			objField.getValue().set(objField.getKey(), z);
+			lastField.set(lastObj, z);
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
@@ -251,9 +254,10 @@ public class CompoundField<T> implements SimpleField {
 
 	@Override
 	public void setBoolean(Object obj, boolean z) {
-		Map.Entry<Object, Field> objField = traverseAccessors(obj);
+		Object lastObj = traverseAccessors(obj);
+		Field lastField = cachedField;
 		try {
-			objField.getValue().setBoolean(objField.getKey(), z);
+			lastField.setBoolean(lastObj, z);
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
@@ -262,9 +266,10 @@ public class CompoundField<T> implements SimpleField {
 
 	@Override
 	public void setByte(Object obj, byte z) {
-		Map.Entry<Object, Field> objField = traverseAccessors(obj);
+		Object lastObj = traverseAccessors(obj);
+		Field lastField = cachedField;
 		try {
-			objField.getValue().setByte(objField.getKey(), z);
+			lastField.setByte(lastObj, z);
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
@@ -273,9 +278,10 @@ public class CompoundField<T> implements SimpleField {
 
 	@Override
 	public void setCharacter(Object obj, char z) {
-		Map.Entry<Object, Field> objField = traverseAccessors(obj);
+		Object lastObj = traverseAccessors(obj);
+		Field lastField = cachedField;
 		try {
-			objField.getValue().setChar(objField.getKey(), z);
+			lastField.setChar(lastObj, z);
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
@@ -284,9 +290,10 @@ public class CompoundField<T> implements SimpleField {
 
 	@Override
 	public void setShort(Object obj, short z) {
-		Map.Entry<Object, Field> objField = traverseAccessors(obj);
+		Object lastObj = traverseAccessors(obj);
+		Field lastField = cachedField;
 		try {
-			objField.getValue().setShort(objField.getKey(), z);
+			lastField.setShort(lastObj, z);
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
@@ -295,9 +302,10 @@ public class CompoundField<T> implements SimpleField {
 
 	@Override
 	public void setInteger(Object obj, int z) {
-		Map.Entry<Object, Field> objField = traverseAccessors(obj);
+		Object lastObj = traverseAccessors(obj);
+		Field lastField = cachedField;
 		try {
-			objField.getValue().setInt(objField.getKey(), z);
+			lastField.setInt(lastObj, z);
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
@@ -306,9 +314,10 @@ public class CompoundField<T> implements SimpleField {
 
 	@Override
 	public void setFloat(Object obj, float z) {
-		Map.Entry<Object, Field> objField = traverseAccessors(obj);
+		Object lastObj = traverseAccessors(obj);
+		Field lastField = cachedField;
 		try {
-			objField.getValue().setFloat(objField.getKey(), z);
+			lastField.setFloat(lastObj, z);
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
@@ -317,9 +326,10 @@ public class CompoundField<T> implements SimpleField {
 
 	@Override
 	public void setLong(Object obj, long z) {
-		Map.Entry<Object, Field> objField = traverseAccessors(obj);
+		Object lastObj = traverseAccessors(obj);
+		Field lastField = cachedField;
 		try {
-			objField.getValue().setLong(objField.getKey(), z);
+			lastField.setLong(lastObj, z);
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
@@ -328,9 +338,10 @@ public class CompoundField<T> implements SimpleField {
 
 	@Override
 	public void setDouble(Object obj, double z) {
-		Map.Entry<Object, Field> objField = traverseAccessors(obj);
+		Object lastObj = traverseAccessors(obj);
+		Field lastField = cachedField;
 		try {
-			objField.getValue().setDouble(objField.getKey(), z);
+			lastField.setDouble(lastObj, z);
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}

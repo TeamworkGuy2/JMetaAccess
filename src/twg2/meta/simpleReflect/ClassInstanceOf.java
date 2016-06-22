@@ -46,7 +46,7 @@ public class ClassInstanceOf {
 	 */
 	public static int depthSeparation(Class<?> parent, Class<?> child) {
 		List<Integer> depths = new ArrayList<>();
-		depthSeparation0(parent, child, 0, depths);
+		_depthSeparation(parent, child, 0, depths);
 		int least = Integer.MAX_VALUE;
 		for(int i = depths.size() - 1; i > -1; i--) {
 			int depthI = depths.get(i);
@@ -58,7 +58,7 @@ public class ClassInstanceOf {
 	}
 
 
-	public static void depthSeparation0(Class<?> parent, Class<?> child, int currentTravelDepth, List<Integer> resDepths) {
+	public static void _depthSeparation(Class<?> parent, Class<?> child, int currentTravelDepth, List<Integer> resDepths) {
 		if(child.equals(parent)) {
 			resDepths.add(currentTravelDepth);
 			return;
@@ -68,14 +68,14 @@ public class ClassInstanceOf {
 		if(!child.isInterface()) {
 			Class<?> parentClass = child.getSuperclass();
 			if(parentClass != null) {
-				depthSeparation0(parent, parentClass, currentTravelDepth + 1, resDepths);
+				_depthSeparation(parent, parentClass, currentTravelDepth + 1, resDepths);
 			}
 		}
 
 		// traverse implemented interfaces
 		for(Class<?> parentInterface : child.getInterfaces()) {
 			if(parent.isAssignableFrom(parentInterface)) {
-				depthSeparation0(parent, parentInterface, currentTravelDepth + 1, resDepths);
+				_depthSeparation(parent, parentInterface, currentTravelDepth + 1, resDepths);
 			}
 		}
 	}

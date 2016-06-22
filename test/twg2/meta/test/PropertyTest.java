@@ -12,7 +12,7 @@ import org.junit.Test;
 
 import twg2.meta.propertyAccessor.CompoundProperty;
 import twg2.meta.propertyAccessor.PropertyDefinition;
-import twg2.meta.propertyAccessor.PropertyGets;
+import twg2.meta.propertyAccessor.PropertyFactory;
 import twg2.meta.propertyAccessor.PropertyNamingConvention;
 import twg2.meta.test.FieldGetData.ColonyBug;
 import twg2.meta.test.FieldGetData.Termite;
@@ -22,7 +22,7 @@ import checks.CheckCollections;
  * @author TeamworkGuy2
  * @since 2015-6-27
  */
-public class FieldGetSetTest {
+public class PropertyTest {
 
 
 	@Test
@@ -34,7 +34,7 @@ public class FieldGetSetTest {
 
 		for(ColonyBug obj : inputs) {
 			ColonyBug copy = new ColonyBug(0, false, false, null);
-			Map<String, PropertyDefinition<Object>> fields = PropertyGets.createFromObject(obj.getClass(), PropertyNamingConvention.JAVA_BEAN_LIKE);
+			Map<String, PropertyDefinition<Object>> fields = PropertyFactory.fromObject(obj.getClass(), PropertyNamingConvention.JAVA_BEAN_LIKE);
 
 			for(String fieldName : fields.keySet()) {
 				PropertyDefinition<Object> field = fields.get(fieldName);
@@ -51,7 +51,7 @@ public class FieldGetSetTest {
 	public void testGetFieldsRecursive() {
 		Termite termite = FieldGetData.Dummy.newTermite1();
 
-		List<CompoundProperty<Object>> fields = PropertyGets.getAllPropertiesRecursive(Termite.class, Arrays.asList(StringBuilder.class, String.class));
+		List<CompoundProperty<Object>> fields = PropertyFactory.getAllPropertiesRecursive(Termite.class, Arrays.asList(StringBuilder.class, String.class));
 
 		List<String> termiteFields = Arrays.asList("colonyNum", "termiteName", "colonyNotesBuf", "manager", "id", "t", "count");
 

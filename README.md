@@ -1,5 +1,6 @@
 JMetaAccess
 ==============
+version: 0.1.0
 
 Java meta-data access utlities (java.lang.reflect.*). 
 

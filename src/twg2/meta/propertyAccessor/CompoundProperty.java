@@ -2,10 +2,8 @@ package twg2.meta.propertyAccessor;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Map;
 
-import twg2.collections.tuple.Tuples;
-import twg2.collections.util.dataStructures.BiTypeList;
+import twg2.collections.dataStructures.BiTypeList;
 
 /**
  * @author TeamworkGuy2
@@ -13,50 +11,48 @@ import twg2.collections.util.dataStructures.BiTypeList;
  * @param <T> the data type of the field
  */
 public class CompoundProperty<T> implements PropertyDefinition<T> {
-	BiTypeList<Method, Field> parentToFieldAccessors;
+	BiTypeList<Method, Field> hierarchicalAccessors;
 	private boolean setAccessible;
 
 
 	public CompoundProperty() {
-		this.parentToFieldAccessors = new BiTypeList<>(Method.class, Field.class);
+		this.hierarchicalAccessors = new BiTypeList<>(Method.class, Field.class);
 	}
 
 
 	public CompoundProperty(BiTypeList<Method, Field> parentToFieldAccessors) {
-		this.parentToFieldAccessors = parentToFieldAccessors;
+		this.hierarchicalAccessors = parentToFieldAccessors;
 	}
 
 
 	@SafeVarargs
 	public CompoundProperty(Method... fieldAccessors) {
-		this.parentToFieldAccessors = new BiTypeList<>(Method.class, Field.class);
-		this.parentToFieldAccessors.addAll1(fieldAccessors);
+		this.hierarchicalAccessors = new BiTypeList<>(Method.class, Field.class);
+		this.hierarchicalAccessors.addAll1(fieldAccessors);
 	}
 
 
 	@SafeVarargs
 	public CompoundProperty(Field... fieldAccessors) {
-		this.parentToFieldAccessors = new BiTypeList<>(Method.class, Field.class);
-		this.parentToFieldAccessors.addAll2(fieldAccessors);
+		this.hierarchicalAccessors = new BiTypeList<>(Method.class, Field.class);
+		this.hierarchicalAccessors.addAll2(fieldAccessors);
 	}
 
 
 	@Override
 	public String getFieldName() {
-		int lastIdx = parentToFieldAccessors.size() - 1;
-		return parentToFieldAccessors.getAs2(lastIdx).getName();
+		int lastIdx = hierarchicalAccessors.size() - 1;
+		return hierarchicalAccessors.getAs2(lastIdx).getName();
 	}
 
 
 	@Override
 	public <E> void setVal(T val, E srcObject) {
-		Map.Entry<Object, Field> lastField = traverseAccessors(srcObject);
-
-		Object parentObj = lastField.getKey();
-		Field accessor = lastField.getValue();
+		Object lastObj = traverseAccessors(srcObject);
+		Field accessor = (Field)hierarchicalAccessors.get(hierarchicalAccessors.size() - 1);
 
 		try {
-			accessor.set(parentObj, val);
+			accessor.set(lastObj, val);
 		} catch (Exception e) {
 			throw new RuntimeException("setting deep field '" + accessor.getName() + "' (" + accessor.getType() + ") with value " + (val != null ? val.getClass() : "") + " '" + val + "'", e);
 		}
@@ -65,15 +61,13 @@ public class CompoundProperty<T> implements PropertyDefinition<T> {
 
 	@Override
 	public <E> T getVal(E srcObject) {
-		Map.Entry<Object, Field> lastField = traverseAccessors(srcObject);
-
-		Object parentObj = lastField.getKey();
-		Field accessor = lastField.getValue();
+		Object lastObj = traverseAccessors(srcObject);
+		Field accessor = (Field)hierarchicalAccessors.get(hierarchicalAccessors.size() - 1);
 
 		T res = null;
 		try {
 			@SuppressWarnings("unchecked")
-			T val = (T) accessor.get(parentObj);
+			T val = (T) accessor.get(lastObj);
 			res = val;
 		} catch (Exception e) {
 			throw new RuntimeException("getting deep field '" + accessor.getName() + "' (" + accessor.getType() + ")", e);
@@ -85,33 +79,36 @@ public class CompoundProperty<T> implements PropertyDefinition<T> {
 	@Override
 	public Class<T> getType() {
 		@SuppressWarnings("unchecked")
-		Class<T> type = (Class<T>)parentToFieldAccessors.getAs2(parentToFieldAccessors.size() - 1).getType();
+		Class<T> type = (Class<T>)hierarchicalAccessors.getAs2(hierarchicalAccessors.size() - 1).getType();
 		return type;
 	}
 
 
 	@Override
 	public String toString() {
-		return "compoundFields: " + parentToFieldAccessors;
+		return "compoundFields: " + hierarchicalAccessors;
 	}
 
 
-	private Map.Entry<Object, Field> traverseAccessors(Object srcObject) {
+	private Object traverseAccessors(Object srcObject) {
 		if(!setAccessible) {
 			this.setAccessible = true;
-			parentToFieldAccessors.forEach((m) -> {}, (f) -> {
-				f.setAccessible(true);
-			});
+			for(int i = 0, size = hierarchicalAccessors.size(); i < size; i++) {
+				Object accessor = hierarchicalAccessors.get(i);
+				if(accessor instanceof Field) {
+					((Field)accessor).setAccessible(true);
+				}
+			}
 		}
-		Map.Entry<Object, Field> lastField = traverseAccessors(srcObject, parentToFieldAccessors);
-		return lastField;
+		Object lastObj = traverseAccessors(srcObject, hierarchicalAccessors);
+		return lastObj;
 	}
 
 
 	/** traverse a series of methods and fields where each previous method/field returns
 	 * the object to use to access the next method/field
 	 */
-	private static Map.Entry<Object, Field> traverseAccessors(Object srcObject, BiTypeList<Method, Field> accessors) {
+	private static Object traverseAccessors(Object srcObject, BiTypeList<Method, Field> accessors) {
 		int size = accessors.size();
 		Object parentObj = srcObject;
 		Field accessor = (Field)accessors.get(size - 1);
@@ -135,7 +132,7 @@ public class CompoundProperty<T> implements PropertyDefinition<T> {
 			}
 		}
 
-		return Tuples.of(parentObj, accessor);
+		return parentObj;
 	}
 
 }

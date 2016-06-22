@@ -10,9 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import twg2.collections.builder.ListUtil;
+import twg2.collections.builder.MapUtil;
 import twg2.collections.tuple.Entries;
-import twg2.collections.util.ListUtil;
-import twg2.collections.util.MapUtil;
 import twg2.meta.fieldAccess.FieldGets;
 import twg2.treeLike.TreeTraversalOrder;
 import twg2.treeLike.TreeTraverse;
@@ -22,36 +22,35 @@ import twg2.treeLike.parameters.TreePathTraverseParameters;
  * @author TeamworkGuy2
  * @since 2015-7-18
  */
-public class PropertyGets {
+public class PropertyFactory {
 
 	// static utilities that use PropertyImpl
-	public static Map<String, PropertyDefinition<Object>> createFromObject(Class<?> clazz, PropertyNamer namingConvention) {
-		Map<String, Field> fieldMap = FieldGets.getAllFields(clazz);
-		return createFromFieldsIncluding(clazz, namingConvention, fieldMap, fieldMap.keySet());
+	public static Map<String, PropertyDefinition<Object>> fromObject(Class<?> clazz, PropertyNamer namingConvention) {
+		Map<String, Field> fieldMap = FieldGets.getFields(clazz);
+		return fromFieldsIncluding(clazz, namingConvention, fieldMap, fieldMap.keySet());
 	}
 
 
-	public static Map<String, PropertyDefinition<Object>> createFromObjectRecursive(Class<?> clazz, PropertyNamer namingConvention, Collection<Class<?>> stopAtFields) {
+	public static Map<String, PropertyDefinition<Object>> fromObjectRecursive(Class<?> clazz, PropertyNamer namingConvention, Collection<Class<?>> stopAtFields) {
 		List<CompoundProperty<Object>> fields = getAllPropertiesRecursive(clazz, stopAtFields);
 		Map<String, PropertyDefinition<Object>> fieldMap = MapUtil.map(fields, (f) -> Entries.of(f.getFieldName(), f));
-		//return createFromFieldsIncluding(clazz, namingConvention, fieldMap, fieldMap.keySet());
 		return fieldMap;
 	}
 
 
-	public static Map<String, PropertyDefinition<Object>> createFromObjectIncluding(Class<?> clazz, PropertyNamer namingConvention, Collection<String> includingFieldNames) {
-		Map<String, Field> fieldMap = FieldGets.getAllFields(clazz);
-		return createFromFieldsIncluding(clazz, namingConvention, fieldMap, includingFieldNames);
+	public static Map<String, PropertyDefinition<Object>> fromObjectIncluding(Class<?> clazz, PropertyNamer namingConvention, Collection<String> includingFieldNames) {
+		Map<String, Field> fieldMap = FieldGets.getFields(clazz);
+		return fromFieldsIncluding(clazz, namingConvention, fieldMap, includingFieldNames);
 	}
 
 
-	public static Map<String, PropertyDefinition<Object>> createFromObjectExcluding(Class<?> clazz, PropertyNamer namingConvention, Collection<String> excludingFieldNames) {
-		Map<String, Field> fieldMap = FieldGets.getAllFields(clazz);
-		return createFromFieldsExcluding(clazz, namingConvention, fieldMap, excludingFieldNames);
+	public static Map<String, PropertyDefinition<Object>> fromObjectExcluding(Class<?> clazz, PropertyNamer namingConvention, Collection<String> excludingFieldNames) {
+		Map<String, Field> fieldMap = FieldGets.getFields(clazz);
+		return fromFieldsExcluding(clazz, namingConvention, fieldMap, excludingFieldNames);
 	}
 
 
-	public static <T> PropertyDefinition<T> createFromName(Class<?> instClass, Class<T> fieldType, PropertyNamer namingConvention, Map<String, Field> fieldMap, String fieldName) {
+	public static <T> PropertyDefinition<T> fromName(Class<?> instClass, Class<T> fieldType, PropertyNamer namingConvention, Map<String, Field> fieldMap, String fieldName) {
 		try {
 			Field field = fieldMap.get(fieldName);
 			if(field == null) {
@@ -73,13 +72,13 @@ public class PropertyGets {
 	}
 
 
-	public static Map<String, PropertyDefinition<Object>> createFromFields(Class<?> instClass, PropertyNamer namingConvention, Map<String, Field> fieldMap) {
+	public static Map<String, PropertyDefinition<Object>> fromFields(Class<?> instClass, PropertyNamer namingConvention, Map<String, Field> fieldMap) {
 		Map<String, PropertyDefinition<Object>> resFields = new HashMap<>();
 
 		for(Map.Entry<String, Field> objField : fieldMap.entrySet()) {
 			@SuppressWarnings("unchecked")
 			Class<Object> fieldType = (Class<Object>)objField.getValue().getType();
-			PropertyDefinition<Object> getSetField = createFromName(instClass, fieldType, namingConvention, fieldMap, objField.getKey());
+			PropertyDefinition<Object> getSetField = fromName(instClass, fieldType, namingConvention, fieldMap, objField.getKey());
 			resFields.put(objField.getKey(), getSetField);
 		}
 
@@ -87,7 +86,7 @@ public class PropertyGets {
 	}
 
 
-	public static Map<String, PropertyDefinition<Object>> createFromFieldsExcluding(Class<?> instClass, PropertyNamer namingConvention, Map<String, Field> fieldMap, Collection<String> excludeFieldNames) {
+	public static Map<String, PropertyDefinition<Object>> fromFieldsExcluding(Class<?> instClass, PropertyNamer namingConvention, Map<String, Field> fieldMap, Collection<String> excludeFieldNames) {
 		Map<String, PropertyDefinition<Object>> resFields = new HashMap<>();
 
 		for(Map.Entry<String, Field> objField : fieldMap.entrySet()) {
@@ -97,7 +96,7 @@ public class PropertyGets {
 			else {
 				@SuppressWarnings("unchecked")
 				Class<Object> fieldType = (Class<Object>)objField.getValue().getType();
-				PropertyDefinition<Object> getSetField = createFromName(instClass, fieldType, namingConvention, fieldMap, objField.getKey());
+				PropertyDefinition<Object> getSetField = fromName(instClass, fieldType, namingConvention, fieldMap, objField.getKey());
 				resFields.put(objField.getKey(), getSetField);
 			}
 		}
@@ -106,7 +105,7 @@ public class PropertyGets {
 	}
 
 
-	public static Map<String, PropertyDefinition<Object>> createFromFieldsIncluding(Class<?> instClass, PropertyNamer namingConvention, Map<String, Field> fieldMap, Collection<String> includeFieldNames) {
+	public static Map<String, PropertyDefinition<Object>> fromFieldsIncluding(Class<?> instClass, PropertyNamer namingConvention, Map<String, Field> fieldMap, Collection<String> includeFieldNames) {
 		Map<String, PropertyDefinition<Object>> resFields = new HashMap<>();
 
 		for(String fieldName : includeFieldNames) {
@@ -116,7 +115,7 @@ public class PropertyGets {
 			}
 			@SuppressWarnings("unchecked")
 			Class<Object> fieldType = (Class<Object>)field.getType();
-			PropertyDefinition<Object> getSetField = createFromName(instClass, fieldType, namingConvention, fieldMap, fieldName);
+			PropertyDefinition<Object> getSetField = fromName(instClass, fieldType, namingConvention, fieldMap, fieldName);
 			resFields.put(fieldName, getSetField);
 		}
 
@@ -138,7 +137,7 @@ public class PropertyGets {
 		List<CompoundProperty<Object>> allFields = new ArrayList<>();
 		boolean filterOutStaticFields = true;
 
-		FieldGets.getAllFields0(clazz, tmpChecked, baseFields);
+		FieldGets._getAllFields(clazz, tmpChecked, baseFields);
 		FieldGets.filterKnownFields(baseFields.values(), filterOutStaticFields, true, true, stopAtFieldTypes, tmpKnownFilteredFields, tmpUnknownFilteredFields);
 		allFields.addAll(ListUtil.map(tmpKnownFilteredFields, CompoundProperty<Object>::new));
 		Field[] initialBaseFields = tmpUnknownFilteredFields.toArray(new Field[tmpUnknownFilteredFields.size()]);
@@ -153,7 +152,7 @@ public class PropertyGets {
 				}
 
 				tmpChecked.clear();
-				Map<String, Field> tmpFields = FieldGets.getClassFields(t.getType(), tmpChecked);
+				Map<String, Field> tmpFields = FieldGets.getFields(t.getType(), tmpChecked);
 				FieldGets.filterKnownFields(tmpFields.values(), filterOutStaticFields, true, true, stopAtFieldTypes, tmpKnownFilteredFields, tmpUnknownFilteredFields);
 				int unknownFieldCount = tmpUnknownFilteredFields.size();
 
@@ -163,7 +162,7 @@ public class PropertyGets {
 				return unknownFieldCount > 0;
 			}, (t) -> {
 				tmpChecked.clear();
-				Map<String, Field> tmpFields = FieldGets.getClassFields(t.getType(), tmpChecked);
+				Map<String, Field> tmpFields = FieldGets.getFields(t.getType(), tmpChecked);
 				FieldGets.filterKnownFields(tmpFields.values(), filterOutStaticFields, true, true, stopAtFieldTypes, tmpKnownFilteredFields, tmpUnknownFilteredFields);
 
 				List<Field> resList = new ArrayList<>(tmpUnknownFilteredFields);
@@ -176,8 +175,8 @@ public class PropertyGets {
 			}).setConsumerTreePath((branch, depth, parentBranches) -> {
 				// create the compound field getter/setter from the leaf field and parent field list
 				CompoundProperty<Object> compoundFieldGetSet = new CompoundProperty<>();
-				compoundFieldGetSet.parentToFieldAccessors.addAll2(parentBranches);
-				compoundFieldGetSet.parentToFieldAccessors.add2(branch);
+				compoundFieldGetSet.hierarchicalAccessors.addAll2(parentBranches);
+				compoundFieldGetSet.hierarchicalAccessors.add2(branch);
 
 				allFields.add(compoundFieldGetSet);
 			}));

@@ -13,7 +13,7 @@ import lombok.Getter;
  * @param <E> the field value type
  */
 @AllArgsConstructor
-public class PropertyInst<T, E> {
+public class PropertyFromMethods<T, E> {
 	final @Getter Consumer<E> setter;
 	final @Getter Supplier<E> getter;
 	final @Getter PropertyDefinition<E> propertyDefinition;
@@ -30,12 +30,12 @@ public class PropertyInst<T, E> {
 	}
 
 
-	public static <T, E> PropertyInst<T, E> of(final PropertyDefinition<E> fieldGetSet, final T srcObject) {
+	public static <T, E> PropertyFromMethods<T, E> of(final PropertyDefinition<E> fieldGetSet, final T srcObject) {
 		return newInstance(fieldGetSet, srcObject);
 	}
 
 
-	public static <T, E> PropertyInst<T, E> newInstance(final PropertyDefinition<E> fieldGetSet, final T srcObject) {
+	public static <T, E> PropertyFromMethods<T, E> newInstance(final PropertyDefinition<E> fieldGetSet, final T srcObject) {
 
 		Consumer<E> setter = (E val) -> {
 			fieldGetSet.setVal(val, srcObject);
@@ -45,7 +45,7 @@ public class PropertyInst<T, E> {
 			return fieldGetSet.getVal(srcObject);
 		};
 
-		return new PropertyInst<>(setter, getter, fieldGetSet, srcObject);
+		return new PropertyFromMethods<>(setter, getter, fieldGetSet, srcObject);
 	}
 
 }

@@ -1,14 +1,17 @@
 package twg2.meta.test;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import twg2.meta.fieldAccess.FieldGets;
 import twg2.meta.fieldAccess.SimpleField;
+import twg2.meta.fieldAccess.SimpleFields;
 import twg2.meta.test.FieldGetData.BaseLeaf;
 import twg2.meta.test.FieldGetData.Leaf2;
 import twg2.meta.test.FieldGetData.TermiteColony;
@@ -28,7 +31,7 @@ import checks.CheckTask;
 public class FieldGetTest {
 
 	@Test
-	public void testFieldGet() {
+	public void getFieldsTest() {
 		Object[] inputs = {
 				new Leaf2(),
 				new Tree1(),
@@ -43,21 +46,21 @@ public class FieldGetTest {
 		).toArray(new Set[0]);
 
 		CheckTask.assertTests(inputs, expectedFields, (obj) -> {
-			Set<String> fields = new HashSet<>(FieldGets.getAllFields(obj.getClass()).keySet());
+			Set<String> fields = new HashSet<>(FieldGets.getFields(obj.getClass()).keySet());
 			return fields;
 		});
 	}
 
 
 	@Test
-	public void testFieldGetRecursive() {
+	public void getFieldsRecursiveTest() {
 		List<Class<?>> branchStopFields = Arrays.asList(StringBuilder.class, String.class);
 
 		TermiteColony branchSet = FieldGetData.Dummy.newTermiteColony1();
 
 		//Map<String, SimpleField> fieldMap = SimpleFields.createFromObjectRecursive(branchSet.getClass(), branchStopFields);
 
-		SimpleTree<SimpleField> fields = FieldGets.getAllFieldsRecursive(branchSet.getClass(), branchStopFields, false, false);
+		SimpleTree<SimpleField> fields = SimpleFields.getFieldsRecursive(branchSet.getClass(), branchStopFields, false, false);
 
 		SimpleTreeUtil.transformTree(fields, (Object)branchSet, (field, parentTransformed, parent) -> {
 			//System.out.println("from '" + field.getData().getName() + "', parent=" + parentTransformed.getClass());
@@ -78,14 +81,14 @@ public class FieldGetTest {
 
 
 	@Test
-	public void testFieldGetMapRecursive() {
+	public void getFieldMapRecursiveTest() {
 		List<Class<?>> branchStopFields = Arrays.asList(StringBuilder.class, String.class);
 
 		TermiteColony branchSet = FieldGetData.Dummy.newTermiteColony1();
 
 		//Map<String, SimpleField> fieldMap = SimpleFields.createFromObjectRecursive(branchSet.getClass(), branchStopFields);
 
-		SimpleKeyTree<String, SimpleField> fields = FieldGets.getAllFieldMapRecursive(branchSet.getClass(), branchStopFields, false, false);
+		SimpleKeyTree<String, SimpleField> fields = SimpleFields.getFieldMapRecursive(branchSet.getClass(), branchStopFields, false, false);
 
 		TreeTraverse.traverse(KeyTreeTraverseParameters.allNodes(fields, TreeTraversalOrder.PRE_ORDER, (t) -> t.hasChildren(), (t) -> t.getChildren().entrySet())
 			.setConsumer((node, depth, parent) -> {
@@ -98,6 +101,23 @@ public class FieldGetTest {
 
 		//System.out.println(fields);
 		//System.out.println(fieldMap);
+	}
+
+
+	@Test
+	public void compoundFieldGetTest() {
+		FieldGetData.NotAccessible objNa = new FieldGetData.NotAccessible();
+
+		Field f = FieldGets.getField(FieldGetData.NotAccessible.class, "myPasswords");
+
+		Assert.assertNotNull(f);
+		Assert.assertFalse(f.isAccessible());
+
+		SimpleField sf = SimpleFields.getSimpleField(FieldGetData.NotAccessible.class, "myPasswords", true);
+		Object pwds = sf.get(objNa);
+
+		Assert.assertTrue("expected List, found " + pwds.getClass(), List.class.isAssignableFrom(pwds.getClass()));
+		Assert.assertTrue(sf.getField().isAccessible());
 	}
 
 }

@@ -12,11 +12,11 @@ import java.util.Set;
 
 import twg2.collections.builder.ListUtil;
 import twg2.collections.builder.MapUtil;
-import twg2.collections.tuple.Entries;
 import twg2.meta.fieldAccess.FieldGets;
 import twg2.treeLike.TreeTraversalOrder;
 import twg2.treeLike.TreeTraverse;
 import twg2.treeLike.parameters.TreePathTraverseParameters;
+import twg2.tuple.Entries;
 
 /**
  * @author TeamworkGuy2

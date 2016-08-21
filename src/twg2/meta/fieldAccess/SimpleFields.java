@@ -13,7 +13,6 @@ import java.util.Set;
 
 import twg2.collections.builder.ListUtil;
 import twg2.collections.builder.MapUtil;
-import twg2.collections.tuple.Tuples;
 import twg2.treeLike.TreeBuilder;
 import twg2.treeLike.TreeTraversalOrder;
 import twg2.treeLike.TreeTraverse;
@@ -22,6 +21,7 @@ import twg2.treeLike.simpleTree.SimpleKeyTreeImpl;
 import twg2.treeLike.simpleTree.SimpleTree;
 import twg2.treeLike.simpleTree.SimpleTreeImpl;
 import twg2.treeLike.simpleTree.SimpleTreeUtil;
+import twg2.tuple.Tuples;
 
 /**
  * @author TeamworkGuy2

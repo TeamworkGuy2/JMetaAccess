@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import twg2.primitiveIoTypes.JPrimitiveType;
+import twg2.simpleTypes.ioPrimitives.JPrimitiveType;
 
 /** Helpers for creating {@link SimpleField SimpleFields} and gathering all fields from class hierarchies
  * @author TeamworkGuy2

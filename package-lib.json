@@ -1,12 +1,12 @@
 {
-	"version" : "0.1.1",
+	"version" : "0.1.2",
 	"name" : "jmeta-access",
 	"description" : "Java meta-data access utlities (java.lang.reflect.*) and enums for java primitive types and commonly serializable types",
 	"homepage" : "https://github.com/TeamworkGuy2/JMetaAccess",
 	"license" : "MIT",
 	"main" : "./bin/jmeta_access.jar",
 	"dependencies" : {
-		"jarray-util": "*",
+		"jarrays": "*",
 		"jcollection-util": "*",
 		"jtree-walker": "*"
 	}

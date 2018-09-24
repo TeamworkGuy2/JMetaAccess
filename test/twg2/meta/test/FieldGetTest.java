@@ -9,6 +9,7 @@ import java.util.Set;
 import org.junit.Assert;
 import org.junit.Test;
 
+import twg2.junitassist.checks.CheckTask;
 import twg2.meta.fieldAccess.FieldGets;
 import twg2.meta.fieldAccess.SimpleField;
 import twg2.meta.fieldAccess.SimpleFields;
@@ -22,7 +23,6 @@ import twg2.treeLike.parameters.KeyTreeTraverseParameters;
 import twg2.treeLike.simpleTree.SimpleKeyTree;
 import twg2.treeLike.simpleTree.SimpleTree;
 import twg2.treeLike.simpleTree.SimpleTreeUtil;
-import checks.CheckTask;
 
 /**
  * @author TeamworkGuy2

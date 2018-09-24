@@ -21,10 +21,10 @@ public class ReflectTest {
 	@Test
 	public void testSimpleFieldReflection() throws ClassNotFoundException {
 		SimpleField strContent = SimpleField.createSimpleDeclaredField(String.class, "value");
-		System.out.println("get: " + Arrays.toString((char[])strContent.get("str1")));
+		System.out.println("get: " + Arrays.toString((byte[])strContent.get("str1"))); // changed from char[] -> byte[] in Java 9
 
 		SimpleField strBuilderContent = SimpleField.createSimpleDeclaredField(Class.forName("java.lang.AbstractStringBuilder"), "value");
-		System.out.println("get: " + Arrays.toString((char[])strBuilderContent.get(new StringBuilder("strB"))));
+		System.out.println("get: " + Arrays.toString((byte[])strBuilderContent.get(new StringBuilder("strB")))); // changed from char[] -> byte[] in Java 9
 	}
 
 }

@@ -16,8 +16,8 @@ import javax.swing.plaf.basic.BasicBorders.MarginBorder;
 
 import org.junit.Test;
 
+import twg2.junitassist.checks.CheckTask;
 import twg2.meta.simpleReflect.ClassInstanceOf;
-import checks.CheckTask;
 
 /**
  * @author TeamworkGuy2

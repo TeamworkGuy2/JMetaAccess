@@ -4,15 +4,24 @@ This project does its best to adhere to [Semantic Versioning](http://semver.org/
 
 
 --------
-###[0.1.1](N/A) - 2016-08-21
-####Changed
+### [0.1.2](N/A) - 2018-09-23
+#### Changed
+* Updated `SimpleFields` and `PropertyFactory` internal code to use BaseList from jcollection-util@0.7.5
+* Upgraded to Java 10
+* Upgraded to JUnit 5
+* Updated dependency jcollection-util@0.7.5
+
+
+--------
+### [0.1.1](https://github.com/TeamworkGuy2/JMetaAccess/commit/773055b0d2b406c188379ee196e6c47143f77fac) - 2016-08-21
+#### Changed
 * Added JCollectionBuilders, JCollectionInterface, and JTuples dependencies
 * Updated jcollection-util to latest 0.7.x version
 
 
 --------
-###[0.1.0](https://github.com/TeamworkGuy2/JMetaAccess/commit/f036c16b2703f1ba5759cc610936e201a2b1c9bd) - 2016-06-21
-####Added
+### [0.1.0](https://github.com/TeamworkGuy2/JMetaAccess/commit/f036c16b2703f1ba5759cc610936e201a2b1c9bd) - 2016-06-21
+#### Added
 * Initial versioning of existing code, including simple field lookup with wrappers for treating fields like getters/setters, property like views of fields (i.e. getter and setter pair), and other simple reflection utilities
 * Added FieldGets methods for looking up single fields by name
 * Added PropertyFactory methods for creating SimpleField instances from a class' fields, also includes methods for gather all of the hierarchical fields of a class' parent classes and interfaces

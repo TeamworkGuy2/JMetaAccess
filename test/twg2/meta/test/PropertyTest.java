@@ -5,18 +5,17 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import lombok.val;
-
 import org.junit.Assert;
 import org.junit.Test;
 
+import lombok.val;
+import twg2.junitassist.checks.CheckCollections;
 import twg2.meta.propertyAccessor.CompoundProperty;
 import twg2.meta.propertyAccessor.PropertyDefinition;
 import twg2.meta.propertyAccessor.PropertyFactory;
 import twg2.meta.propertyAccessor.PropertyNamingConvention;
 import twg2.meta.test.FieldGetData.ColonyBug;
 import twg2.meta.test.FieldGetData.Termite;
-import checks.CheckCollections;
 
 /**
  * @author TeamworkGuy2

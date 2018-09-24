@@ -13,6 +13,7 @@ import java.util.Set;
 
 import twg2.collections.builder.ListUtil;
 import twg2.collections.builder.MapUtil;
+import twg2.collections.dataStructures.BaseList;
 import twg2.treeLike.TreeBuilder;
 import twg2.treeLike.TreeTraversalOrder;
 import twg2.treeLike.TreeTraverse;
@@ -358,7 +359,7 @@ public class SimpleFields {
 				Map<String, Field> tmpFields = FieldGets.getFields(t.getType(), tmpChecked);
 				FieldGets.filterKnownFields(tmpFields.values(), filterOutStaticFields, true, true, stopAtFieldTypes, tmpKnownFilteredFields, tmpUnknownFilteredFields);
 
-				List<Field> resList = new ArrayList<>(tmpUnknownFilteredFields);
+				BaseList<Field> resList = new BaseList<>(tmpUnknownFilteredFields);
 				resList.addAll(tmpKnownFilteredFields);
 
 				tmpKnownFilteredFields.clear();

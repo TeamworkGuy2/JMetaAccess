@@ -4,7 +4,13 @@ This project does its best to adhere to [Semantic Versioning](http://semver.org/
 
 
 --------
-### [0.1.2](N/A) - 2018-09-23
+### [0.1.3](N/A) - 2018-09-23
+#### Changed
+Forgot to commit package-lib.json changes and bin jar files.
+
+
+--------
+### [0.1.2](https://github.com/TeamworkGuy2/JMetaAccess/commit/e7401efb58e138de047600d1093deecf0f530aed) - 2018-09-23
 #### Changed
 * Updated `SimpleFields` and `PropertyFactory` internal code to use BaseList from jcollection-util@0.7.5
 * Upgraded to Java 10

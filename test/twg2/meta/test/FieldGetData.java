@@ -4,13 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
-
 /**
  * @author TeamworkGuy2
  * @since 2015-9-7
@@ -47,57 +40,138 @@ public class FieldGetData {
 
 
 	public static class Base implements BaseI {
-		private @Getter @Setter int baseI_Field1;
+		private int baseI_Field1;
+
+		@Override public int getBaseI_Field1() { return baseI_Field1; }
+
+		@Override public void setBaseI_Field1(int baseI_Field1) { this.baseI_Field1 = baseI_Field1; }
 	}
 
 
 	public static class Tree1 implements Tree1I {
-		private @Getter @Setter int tree1I_Field1;
+		private int tree1I_Field1;
+
+		@Override public int getTree1I_Field1() { return tree1I_Field1; }
+
+		@Override public void setTree1I_Field1(int tree1i_Field1) { tree1I_Field1 = tree1i_Field1; }
 	}
 
 
 	public static class Tree2 implements Tree2I {
-		private @Getter @Setter int tree2I_Field1;
+		private int tree2I_Field1;
+
+		@Override public int getTree2I_Field1() { return tree2I_Field1; }
+
+		@Override public void setTree2I_Field1(int tree2i_Field1) { tree2I_Field1 = tree2i_Field1; }
 	}
 
 
 	public static class Leaf1 extends Tree1 implements Leaf1I {
-		private @Getter @Setter double leaf1_Field1;
-		public @Override void blowInTheWind_Leaf1() { System.out.println("blow in the wind 1"); }
+		private double leaf1_Field1;
+
+		public double getLeaf1_Field1() { return leaf1_Field1; }
+
+		public void setLeaf1_Field1(double leaf1_Field1) { this.leaf1_Field1 = leaf1_Field1; }
+
+
+		@Override
+		public void blowInTheWind_Leaf1() {
+			System.out.println("blow in the wind 1");
+		}
 	}
 
 
 	public static class Leaf2 extends Tree2 implements Leaf2I {
-		private @Getter @Setter Object leaf2_Field1;
-		private @Getter @Setter java.lang.annotation.ElementType leaf2_Field2;
-		public @Override void blowInTheWind_Leaf2() { System.out.println("blow in the wind 2"); }
+		private Object leaf2_Field1;
+		private java.lang.annotation.ElementType leaf2_Field2;
+
+		public Object getLeaf2_Field1() { return leaf2_Field1; }
+
+		public void setLeaf2_Field1(Object leaf2_Field1) { this.leaf2_Field1 = leaf2_Field1; }
+
+		public java.lang.annotation.ElementType getLeaf2_Field2() { return leaf2_Field2; }
+
+		public void setLeaf2_Field2(java.lang.annotation.ElementType leaf2_Field2) { this.leaf2_Field2 = leaf2_Field2; }
+
+
+		@Override
+		public void blowInTheWind_Leaf2() {
+			System.out.println("blow in the wind 2");
+		}
 	}
 
 
 	public static class BaseLeaf extends Base implements BaseI {
-		public @Getter @Setter String baseLeaf_Field1;
+		public String baseLeaf_Field1;
+
+		public String getBaseLeaf_Field1() { return baseLeaf_Field1; }
+
+		public void setBaseLeaf_Field1(String baseLeaf_Field1) { this.baseLeaf_Field1 = baseLeaf_Field1; }
 	}
 
 
 
 
 	// ==== Bugs! twg2.meta.test classes ====
-	@AllArgsConstructor
-	@NoArgsConstructor
-	@EqualsAndHashCode
-	@ToString
 	public static class Bug {
-		private @Getter @Setter int count;
-		private @Getter @Setter boolean t;
+		private int count;
+		private boolean t;
+
+		public Bug() {
+		}
+
+		public Bug(int count, boolean t) {
+			this.count = count;
+			this.t = t;
+		}
+
+		public int getCount() { return count; }
+
+		public void setCount(int count) { this.count = count; }
+
+		public boolean isT() { return t; }
+
+		public void setT(boolean t) { this.t = t; }
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + count;
+			result = prime * result + (t ? 1231 : 1237);
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Bug other = (Bug) obj;
+			if (count != other.count)
+				return false;
+			if (t != other.t)
+				return false;
+			return true;
+		}
+
+		@Override
+		public String toString() {
+			return "Bug [count=" + count + ", t=" + t + "]";
+		}
 	}
 
 
-	@NoArgsConstructor
-	@EqualsAndHashCode(callSuper = true)
-	@ToString
 	public static class ColonyBug extends Bug {
-		private @Getter @Setter boolean manager;
-		private @Getter @Setter String id;
+		private boolean manager;
+		private String id;
+
+		public ColonyBug() {
+			super();
+		}
 
 		public ColonyBug(int count, boolean t, boolean manager, String id) {
 			super(count, t);
@@ -105,16 +179,57 @@ public class FieldGetData {
 			this.id = id;
 		}
 
+		public boolean isManager() { return manager; }
+
+		public void setManager(boolean manager) { this.manager = manager; }
+
+		public String getId() { return id; }
+
+		public void setId(String id) { this.id = id; }
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = super.hashCode();
+			result = prime * result + ((id == null) ? 0 : id.hashCode());
+			result = prime * result + (manager ? 1231 : 1237);
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (!super.equals(obj))
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			ColonyBug other = (ColonyBug) obj;
+			if (id == null) {
+				if (other.id != null)
+					return false;
+			} else if (!id.equals(other.id))
+				return false;
+			if (manager != other.manager)
+				return false;
+			return true;
+		}
+
+		@Override
+		public String toString() {
+			return "ColonyBug [manager=" + manager + ", id=" + id + "]";
+		}
 	}
 
 
-	@NoArgsConstructor
-	@EqualsAndHashCode(callSuper = true)
-	@ToString
 	public static class Termite extends ColonyBug {
-		private @Getter @Setter int colonyNum;
-		private @Getter @Setter String termiteName;
-		private @Getter @Setter StringBuilder colonyNotesBuf;
+		private int colonyNum;
+		private String termiteName;
+		private StringBuilder colonyNotesBuf;
+
+		public Termite() {
+			super();
+		}
 
 		public Termite(int colonyNum, String termiteName, int count, boolean t, boolean awesome, String id) {
 			super(count, t, awesome, id);
@@ -123,17 +238,67 @@ public class FieldGetData {
 			this.colonyNotesBuf = new StringBuilder();
 		}
 
+		public int getColonyNum() { return colonyNum; }
+
+		public void setColonyNum(int colonyNum) { this.colonyNum = colonyNum; }
+
+		public String getTermiteName() { return termiteName; }
+
+		public void setTermiteName(String termiteName) { this.termiteName = termiteName; }
+
+		public StringBuilder getColonyNotesBuf() { return colonyNotesBuf; }
+
+		public void setColonyNotesBuf(StringBuilder colonyNotesBuf) { this.colonyNotesBuf = colonyNotesBuf; }
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = super.hashCode();
+			result = prime * result + ((colonyNotesBuf == null) ? 0 : colonyNotesBuf.hashCode());
+			result = prime * result + colonyNum;
+			result = prime * result + ((termiteName == null) ? 0 : termiteName.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (!super.equals(obj))
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Termite other = (Termite) obj;
+			if (colonyNotesBuf == null) {
+				if (other.colonyNotesBuf != null)
+					return false;
+			} else if (!colonyNotesBuf.equals(other.colonyNotesBuf))
+				return false;
+			if (colonyNum != other.colonyNum)
+				return false;
+			if (termiteName == null) {
+				if (other.termiteName != null)
+					return false;
+			} else if (!termiteName.equals(other.termiteName))
+				return false;
+			return true;
+		}
+
+		@Override
+		public String toString() {
+			return "Termite [colonyNum=" + colonyNum + ", termiteName=" + termiteName + ", colonyNotesBuf=" + colonyNotesBuf + "]";
+		}
 	}
 
 
-	@NoArgsConstructor
-	@EqualsAndHashCode
-	@ToString
 	public static class TermiteColony {
-		private @Getter @Setter Termite boss;
-		private @Getter @Setter List<Termite> termites;
-		private @Getter @Setter long memPool;
-		private @Getter @Setter char[] colonyName;
+		private Termite boss;
+		private List<Termite> termites;
+		private long memPool;
+		private char[] colonyName;
+
+		public TermiteColony() {
+		}
 
 		public TermiteColony(Termite boss, List<Termite> termites, long memPool, String colonyName) {
 			this.boss = boss;
@@ -142,6 +307,63 @@ public class FieldGetData {
 			this.colonyName = colonyName.toCharArray();
 		}
 
+		public Termite getBoss() { return boss; }
+
+		public void setBoss(Termite boss) { this.boss = boss; }
+
+		public List<Termite> getTermites() { return termites; }
+
+		public void setTermites(List<Termite> termites) { this.termites = termites; }
+
+		public long getMemPool() { return memPool; }
+
+		public void setMemPool(long memPool) { this.memPool = memPool; }
+
+		public char[] getColonyName() { return colonyName; }
+
+		public void setColonyName(char[] colonyName) { this.colonyName = colonyName; }
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((boss == null) ? 0 : boss.hashCode());
+			result = prime * result + Arrays.hashCode(colonyName);
+			result = prime * result + (int) (memPool ^ (memPool >>> 32));
+			result = prime * result + ((termites == null) ? 0 : termites.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			TermiteColony other = (TermiteColony) obj;
+			if (boss == null) {
+				if (other.boss != null)
+					return false;
+			} else if (!boss.equals(other.boss))
+				return false;
+			if (!Arrays.equals(colonyName, other.colonyName))
+				return false;
+			if (memPool != other.memPool)
+				return false;
+			if (termites == null) {
+				if (other.termites != null)
+					return false;
+			} else if (!termites.equals(other.termites))
+				return false;
+			return true;
+		}
+
+		@Override
+		public String toString() {
+			return "TermiteColony [boss=" + boss + ", termites=" + termites + ", memPool=" + memPool + ", colonyName=" + Arrays.toString(colonyName) + "]";
+		}
 	}
 
 

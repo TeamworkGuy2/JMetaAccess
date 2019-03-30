@@ -8,7 +8,6 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 
-import lombok.val;
 import twg2.junitassist.checks.CheckCollections;
 import twg2.meta.propertyAccessor.CompoundProperty;
 import twg2.meta.propertyAccessor.PropertyDefinition;
@@ -55,7 +54,7 @@ public class PropertyTest {
 		List<String> termiteFields = Arrays.asList("colonyNum", "termiteName", "colonyNotesBuf", "manager", "id", "t", "count");
 
 		List<String> fieldNames = new ArrayList<>();
-		for(val field : fields) {
+		for(CompoundProperty<Object> field : fields) {
 			fieldNames.add(field.getFieldName());
 		}
 		CheckCollections.assertLooseEquals(termiteFields, fieldNames);

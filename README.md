@@ -1,6 +1,5 @@
 JMetaAccess
 ==============
-version: 0.1.3
 
 Java meta-data access utilities (`java.lang.reflect.*`).
 

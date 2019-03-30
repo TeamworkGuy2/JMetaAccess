@@ -3,20 +3,45 @@ package twg2.meta.propertyAccessor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
 /**
  * @author TeamworkGuy2
  * @since 2015-6-27
  * @param <T> the data type of the field
  */
-@AllArgsConstructor
 public class PropertyImpl<T> implements PropertyDefinition<T> {
-	@Getter Method setterRef;
-	@Getter Method getterRef;
-	@Getter String fieldName;
-	@Getter Field field;
+	Method setterRef;
+	Method getterRef;
+	String fieldName;
+	Field field;
+
+
+	public PropertyImpl(Method setterRef, Method getterRef, String fieldName, Field field) {
+		this.setterRef = setterRef;
+		this.getterRef = getterRef;
+		this.fieldName = fieldName;
+		this.field = field;
+	}
+
+
+	public Method getSetterRef() {
+		return setterRef;
+	}
+
+
+	public Method getGetterRef() {
+		return getterRef;
+	}
+
+
+	@Override
+	public String getFieldName() {
+		return fieldName;
+	}
+
+
+	public Field getField() {
+		return field;
+	}
 
 
 	public String getGetterName() {

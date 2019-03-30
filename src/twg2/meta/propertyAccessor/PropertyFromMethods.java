@@ -3,21 +3,45 @@ package twg2.meta.propertyAccessor;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
 /**
  * @author TeamworkGuy2
  * @since 2015-6-27
  * @param <T> the type of object the field comes from
  * @param <E> the field value type
  */
-@AllArgsConstructor
 public class PropertyFromMethods<T, E> {
-	final @Getter Consumer<E> setter;
-	final @Getter Supplier<E> getter;
-	final @Getter PropertyDefinition<E> propertyDefinition;
-	final @Getter T srcObject;
+	final Consumer<E> setter;
+	final Supplier<E> getter;
+	final PropertyDefinition<E> propertyDefinition;
+	final T srcObject;
+
+
+	public PropertyFromMethods(Consumer<E> setter, Supplier<E> getter, PropertyDefinition<E> propertyDefinition, T srcObject) {
+		this.setter = setter;
+		this.getter = getter;
+		this.propertyDefinition = propertyDefinition;
+		this.srcObject = srcObject;
+	}
+
+
+	public Consumer<E> getSetter() {
+		return setter;
+	}
+
+
+	public Supplier<E> getGetter() {
+		return getter;
+	}
+
+
+	public PropertyDefinition<E> getPropertyDefinition() {
+		return propertyDefinition;
+	}
+
+
+	public T getSrcObject() {
+		return srcObject;
+	}
 
 
 	public E getValue() {

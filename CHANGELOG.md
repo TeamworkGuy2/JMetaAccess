@@ -4,7 +4,13 @@ This project does its best to adhere to [Semantic Versioning](http://semver.org/
 
 
 --------
-### [0.1.3](N/A) - 2018-09-23
+### [0.1.4](N/A) - 2019-03-30
+#### Changed
+* Removed lombok dependency
+
+
+--------
+### [0.1.3](https://github.com/TeamworkGuy2/JMetaAccess/commit/2d1655fe3784da788b9c6e681f881226b273b1ae) - 2018-09-23
 #### Changed
 Forgot to commit package-lib.json changes and bin jar files.
 
